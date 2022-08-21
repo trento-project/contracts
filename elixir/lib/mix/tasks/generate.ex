@@ -80,6 +80,12 @@ defmodule Mix.Tasks.Contracts.Generate do
     end
   end
 
+  def get_field({k, %{"type" => "boolean"}}) do
+    quote do
+      field(unquote(String.to_atom(k)), :boolean)
+    end
+  end
+
   def get_field({k, v}) do
     quote do
     end
