@@ -74,6 +74,12 @@ defmodule Mix.Tasks.Contracts.Generate do
     end
   end
 
+  def get_field({k, %{"type" => "integer"}}) do
+    quote do
+      field(unquote(String.to_atom(k)), :integer)
+    end
+  end
+
   def get_field({k, v}) do
     quote do
     end
