@@ -12,9 +12,16 @@ import (
 	"go.uber.org/multierr"
 )
 
+// Error 
+type Error struct {
+  Message string `json:"message"`
+  Type string `json:"type"`
+}
+
 // FactsGatheredItems 
 type FactsGatheredItems struct {
   CheckId string `json:"check_id"`
+  Error *Error `json:"error,omitempty"`
   Name string `json:"name"`
   Value interface{} `json:"value"`
 }
