@@ -72,6 +72,53 @@ defmodule Mix.Tasks.Contracts.Generate do
     end
   end
 
+  def get_field({k, %{"type" => types}}) when is_list(types) do
+    union_type_module_name = Macro.camelize(k)
+
+    quote do
+      defmodule unquote(Module.concat([union_type_module_name])) do
+        use Ecto.Type
+
+        @moduledoc false
+        def type, do: unquote(String.to_atom(k))
+
+        unquote(
+          Enum.map(types, fn type ->
+            quote do
+              def cast(value) when unquote(Module.concat([get_guard(type)]))(value) do
+                {:ok, value}
+              end
+            end
+          end)
+        )
+
+        def cast(_), do: :error
+
+        unquote(
+          Enum.map(types, fn type ->
+            quote do
+              def dump(value) when unquote(Module.concat([get_guard(type)]))(value) do
+                value
+              end
+            end
+          end)
+        )
+
+        unquote(
+          Enum.map(types, fn type ->
+            quote do
+              def load(value) when unquote(Module.concat([get_guard(type)]))(value) do
+                {:ok, value}
+              end
+            end
+          end)
+        )
+      end
+
+      field(unquote(String.to_atom(k)), unquote(Module.concat([union_type_module_name])))
+    end
+  end
+
   def get_field({k, %{"type" => "string"}}) do
     quote do
       field(unquote(String.to_atom(k)), :string)
@@ -107,6 +154,10 @@ defmodule Mix.Tasks.Contracts.Generate do
 
     "Trento.Events.#{Macro.camelize(module_name)}"
   end
+
+  def get_guard("string"), do: "Kernel.is_bitstring"
+  def get_guard("number"), do: "Kernel.is_number"
+  def get_guard("boolean"), do: "Kernel.is_boolean"
 
   def trento_contract_functions() do
     quote do
