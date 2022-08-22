@@ -58,9 +58,13 @@ defmodule Mix.Tasks.Contracts.Generate do
            "items" => %{"type" => "object", "properties" => properties} = items
          }}
       ) do
+    required = get_required(items)
+
     quote do
       embeds_many unquote(String.to_atom(k)), unquote(Module.concat([Macro.camelize(k)])),
         primary_key: false do
+        @required_fields unquote(required)
+
         unquote(Enum.map(properties, &get_field/1))
 
         unquote(trento_contract_functions())
@@ -86,7 +90,7 @@ defmodule Mix.Tasks.Contracts.Generate do
     end
   end
 
-  def get_field({k, v}) do
+  def get_field({_k, _v}) do
     quote do
     end
   end

@@ -7,6 +7,7 @@ defmodule Trento.Events.Checks.V1.FactsRequest do
     [
       field(:execution_id, :string),
       embeds_many(:facts, Facts, primary_key: false) do
+        @required_fields [:check_id, :name, :gatherer, :argument]
         [
           field(:argument, :string),
           field(:check_id, :string),
