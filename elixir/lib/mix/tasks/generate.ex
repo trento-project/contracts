@@ -39,14 +39,12 @@ defmodule Mix.Tasks.Contracts.Generate do
     required = get_required(item)
 
     quote do
-      field unquote(String.to_atom(k)), unquote(Module.concat([Macro.camelize(k)])) do
+      embeds_one unquote(String.to_atom(k)), unquote(Module.concat([Macro.camelize(k)])) do
         @required_fields unquote(required)
 
         unquote(trento_contract_functions())
 
-        embedded_schema do
           unquote(Enum.map(properties, &get_field/1))
-        end
       end
     end
   end
