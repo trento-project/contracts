@@ -17,22 +17,26 @@
         "type": "object",
         "properties": {
           "check_id": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "value": {
-            "type": ["number", "string", "boolean"]
+            "type": ["number", "string", "boolean", "null"]
           },
           "error": {
             "type": "object",
             "properties": {
               "message": {
-                "type": "string"
+                "type": "string",
+                "minLength": 1
               },
               "type": {
-                "type": "string"
+                "type": "string",
+                "minLength": 1
               }
             },
             "required": ["message", "type"]

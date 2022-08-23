@@ -1,4 +1,3 @@
-
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
@@ -14,29 +13,25 @@
         "type": "object",
         "properties": {
           "check_id": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "gatherer": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "argument": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           }
         },
-        "required": [
-          "check_id",
-          "name",
-          "gatherer",
-          "argument"
-        ]
+        "required": ["check_id", "name", "gatherer"]
       }
     }
   },
-  "required": [
-    "execution_id",
-    "facts"
-  ]
+  "required": ["execution_id", "facts"]
 }

@@ -14,7 +14,7 @@ import (
 
 // FactsItems 
 type FactsItems struct {
-  Argument string `json:"argument"`
+  Argument string `json:"argument,omitempty"`
   CheckId string `json:"check_id"`
   Gatherer string `json:"gatherer"`
   Name string `json:"name"`
@@ -26,10 +26,7 @@ type FactsRequestV1 struct {
   Facts []*FactsItems `json:"facts"`
 }
 
-
-
 // Validation code 
-
 
 func NewFactsRequestV1FromJson(rawJson []byte) (*FactsRequestV1, error) {
 	var event FactsRequestV1
