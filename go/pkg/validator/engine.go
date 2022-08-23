@@ -4,7 +4,7 @@ import (
 	"embed"
 )
 
-//go:embed schema/*.json
+//go:embed schemas/*.json
 var schemaFS embed.FS
 
 func GetSchema(path string) (string, error) {
