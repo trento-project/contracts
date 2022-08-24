@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/CDimonaco/generate"
 )
 
 var (
 	pkg      = flag.String("package", "entities", "package name of generated code")
-	path     = flag.String("path", "pkg/entities", "the path of the generated code")
+	path     = flag.String("path", "pkg/gen/entities", "the path of the generated code")
 	fileName = flag.String("fileName", "", "the go output file name")
 )
 
@@ -134,15 +135,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	outputPath := fmt.Sprintf("%s/%s", *path, *fileName)
-
-	fmt.Printf("\n generating go output file %s \n", outputPath)
-
 	var w = bytes.NewBufferString("")
 
 	generate.Output(w, g, *pkg, true, importCodeTemplate)
 
 	_, file := filepath.Split(inputSchema)
+
+	fileParts := strings.Split(file, ".")
+
+	// take the version part of the file, following the naming convention in readme
+	// `trento.[project].[version].[source].[SchemaName].schema.json`
+
+	composedFileName := fmt.Sprintf("%s_%s.go", *fileName, fileParts[2])
+
+	outputPath := fmt.Sprintf("%s/%s", *path, composedFileName)
+
+	fmt.Printf("\n generating go output file %s \n", outputPath)
 
 	w.WriteString(
 		fmt.Sprintf(

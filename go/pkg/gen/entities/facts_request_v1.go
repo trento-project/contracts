@@ -12,31 +12,24 @@ import (
 	"go.uber.org/multierr"
 )
 
-// Error 
-type Error struct {
-  Message string `json:"message"`
-  Type string `json:"type"`
-}
-
-// FactsGatheredItems 
-type FactsGatheredItems struct {
+// FactsItems 
+type FactsItems struct {
+  Argument string `json:"argument,omitempty"`
   CheckId string `json:"check_id"`
-  Error *Error `json:"error,omitempty"`
+  Gatherer string `json:"gatherer"`
   Name string `json:"name"`
-  Value interface{} `json:"value"`
 }
 
-// FactsGatheredV1 
-type FactsGatheredV1 struct {
-  AgentId string `json:"agent_id"`
+// FactsRequestV1 
+type FactsRequestV1 struct {
   ExecutionId string `json:"execution_id"`
-  FactsGathered []*FactsGatheredItems `json:"facts_gathered"`
+  Facts []*FactsItems `json:"facts"`
 }
 
 // Validation code 
 
-func NewFactsGatheredV1FromJson(rawJson []byte) (*FactsGatheredV1, error) {
-	var event FactsGatheredV1
+func NewFactsRequestV1FromJson(rawJson []byte) (*FactsRequestV1, error) {
+	var event FactsRequestV1
 	err := json.Unmarshal(rawJson, &event)
 	if err != nil {
 		return nil, err
@@ -50,8 +43,8 @@ func NewFactsGatheredV1FromJson(rawJson []byte) (*FactsGatheredV1, error) {
 	return &event, nil
 }
 
-func (e *FactsGatheredV1) Valid() error {
-	schema, err := validator.GetSchema("schemas/trento.checks.v1.FactsGathered.schema.json")
+func (e *FactsRequestV1) Valid() error {
+	schema, err := validator.GetSchema("schemas/trento.checks.v1.wanda.FactsRequest.schema.json")
 	if err != nil {
 		return err
 	}
