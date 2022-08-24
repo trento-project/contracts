@@ -119,6 +119,53 @@ defmodule Mix.Tasks.Contracts.Generate do
     end
   end
 
+  def get_field({k, %{"type" => "array", "items" => %{"oneOf" => types}}}) when is_list(types) do
+    union_type_module_name = Macro.camelize(k)
+
+    quote do
+      defmodule unquote(Module.concat([union_type_module_name])) do
+        use Ecto.Type
+        @moduledoc false
+        def type, do: unquote(String.to_atom(k))
+
+        unquote(
+          Enum.map(types, fn type ->
+            case type do
+              %{"title" => title, "properties" => properties} ->
+                quote do
+                  defmodule unquote(Module.concat([title])) do
+                    use Ecto.Schema
+                    @primary_key false
+                    @derive Jason.Encoder
+                    embedded_schema do
+                      unquote(Enum.map(properties, &get_field/1))
+                    end
+
+                    unquote(trento_contract_functions())
+                  end
+                end
+
+              _ ->
+                quote do
+                end
+            end
+          end)
+        )
+
+        unquote(
+          Enum.map(types, fn type ->
+            quote do
+              def cast(value) do
+              end
+            end
+          end)
+        )
+      end
+
+      embeds_many(unquote(String.to_atom(k)), unquote(Module.concat([union_type_module_name])))
+    end
+  end
+
   def get_field({k, %{"type" => "string"}}) do
     quote do
       field(unquote(String.to_atom(k)), :string)
