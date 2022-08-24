@@ -3,11 +3,13 @@ defmodule Trento.Events.Checks.V1.FactsRequest do
   import Ecto.Changeset
   @primary_key false
   @required_fields [:execution_id, :facts]
+  @derive Jason.Encoder
   embedded_schema do
     [
       field(:execution_id, :string),
       embeds_many(:facts, Facts, primary_key: false) do
-        @required_fields [:check_id, :name, :gatherer, :argument]
+        @derive Jason.Encoder
+        @required_fields [:check_id, :name, :gatherer]
         [
           field(:argument, :string),
           field(:check_id, :string),
