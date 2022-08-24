@@ -21,6 +21,7 @@ defmodule Mix.Tasks.Contracts.Generate do
             @primary_key false
             @required_fields unquote(required)
 
+            @derive Jason.Encoder
             embedded_schema do
               unquote(Enum.map(json_schema["properties"], &get_field/1))
             end
@@ -40,11 +41,11 @@ defmodule Mix.Tasks.Contracts.Generate do
 
     quote do
       embeds_one unquote(String.to_atom(k)), unquote(Module.concat([Macro.camelize(k)])) do
+        @derive Jason.Encoder
         @required_fields unquote(required)
 
+        unquote(Enum.map(properties, &get_field/1))
         unquote(trento_contract_functions())
-
-          unquote(Enum.map(properties, &get_field/1))
       end
     end
   end
@@ -61,6 +62,7 @@ defmodule Mix.Tasks.Contracts.Generate do
     quote do
       embeds_many unquote(String.to_atom(k)), unquote(Module.concat([Macro.camelize(k)])),
         primary_key: false do
+        @derive Jason.Encoder
         @required_fields unquote(required)
 
         unquote(Enum.map(properties, &get_field/1))
@@ -72,16 +74,16 @@ defmodule Mix.Tasks.Contracts.Generate do
 
   def get_field({k, %{"type" => types}}) when is_list(types) do
     union_type_module_name = Macro.camelize(k)
+    actual_types = Enum.filter(types, fn type -> type != "null" end)
 
     quote do
       defmodule unquote(Module.concat([union_type_module_name])) do
         use Ecto.Type
-
         @moduledoc false
         def type, do: unquote(String.to_atom(k))
 
         unquote(
-          Enum.map(types, fn type ->
+          Enum.map(actual_types, fn type ->
             quote do
               def cast(value) when unquote(Module.concat([get_guard(type)]))(value) do
                 {:ok, value}
@@ -93,7 +95,7 @@ defmodule Mix.Tasks.Contracts.Generate do
         def cast(_), do: :error
 
         unquote(
-          Enum.map(types, fn type ->
+          Enum.map(actual_types, fn type ->
             quote do
               def dump(value) when unquote(Module.concat([get_guard(type)]))(value) do
                 value
@@ -103,7 +105,7 @@ defmodule Mix.Tasks.Contracts.Generate do
         )
 
         unquote(
-          Enum.map(types, fn type ->
+          Enum.map(actual_types, fn type ->
             quote do
               def load(value) when unquote(Module.concat([get_guard(type)]))(value) do
                 {:ok, value}
