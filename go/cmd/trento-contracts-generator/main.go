@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/CDimonaco/generate"
+	"github.com/cdimonaco/contracts/go/internal/generator"
 )
 
 var (
@@ -21,57 +22,6 @@ var (
 type schemaEnvelope struct {
 	Title string `json:"title"`
 }
-
-const importCodeTemplate = `
-
-import (
-	"encoding/json"
-	"errors"
-
-	"github.com/cdimonaco/contracts/go/pkg/validator"
-	"github.com/xeipuuv/gojsonschema"
-	"go.uber.org/multierr"
-)
-`
-const validationCodeTemplate = `
-// Validation code 
-
-func New%sFromJson(rawJson []byte) (*%s, error) {
-	var event %s
-	err := json.Unmarshal(rawJson, &event)
-	if err != nil {
-		return nil, err
-	}
-
-	err = event.Valid()
-	if err != nil {
-		return nil, err
-	}
-
-	return &event, nil
-}
-
-func (e *%s) Valid() error {
-	schema, err := validator.GetSchema(%s)
-	if err != nil {
-		return err
-	}
-
-	result, err := gojsonschema.Validate(gojsonschema.NewBytesLoader([]byte(schema)), gojsonschema.NewGoLoader(e))
-	if err != nil {
-		return err
-	}
-
-	var validationError error
-	schemaErrors := result.Errors()
-	for _, e := range schemaErrors {
-		validationError = multierr.Append(validationError, errors.New(e.String()))
-	}
-
-	return validationError
-}
-
-`
 
 func main() {
 	flag.Usage = func() {
@@ -137,7 +87,7 @@ func main() {
 
 	var w = bytes.NewBufferString("")
 
-	generate.Output(w, g, *pkg, true, importCodeTemplate)
+	generate.Output(w, g, *pkg, true, generator.ImportTemplate)
 
 	_, file := filepath.Split(inputSchema)
 
@@ -146,21 +96,35 @@ func main() {
 	// take the version part of the file, following the naming convention in readme
 	// `trento.[project].[version].[source].[SchemaName].schema.json`
 
-	composedFileName := fmt.Sprintf("%s_%s.go", *fileName, fileParts[2])
+	version := fileParts[2]
+	source := fileParts[3]
+	eventType := strings.Join(fileParts[:len(fileParts)-2], ".")
+
+	composedFileName := fmt.Sprintf("%s_%s.go", *fileName, version)
 
 	outputPath := fmt.Sprintf("%s/%s", *path, composedFileName)
 
-	fmt.Printf("\n generating go output file %s \n", outputPath)
+	fmt.Printf(
+		"\n generating go output file %s - version: %s - source: %s - evenType: %s \n",
+		outputPath,
+		version,
+		source,
+		eventType,
+	)
+
+	generatedCode, err := generator.GenerateEntity(generator.GenerationTemplateInput{
+		EntityName:  envelope.Title,
+		SchemaPath:  file,
+		EventSource: source,
+		EventType:   eventType,
+	})
+
+	if err != nil {
+		panic(err)
+	}
 
 	w.WriteString(
-		fmt.Sprintf(
-			validationCodeTemplate,
-			envelope.Title,
-			envelope.Title,
-			envelope.Title,
-			envelope.Title,
-			"\"schemas/"+file+"\"",
-		),
+		generatedCode,
 	)
 
 	err = os.WriteFile(outputPath, w.Bytes(), 0644)
