@@ -99,7 +99,9 @@ func (e *FactsGatheredV1) SerializeCloudEvent() ([]byte, error) {
 	}
 
 	err = event.SetData(cloudevents.ApplicationJSON, data)
-
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not set data for cloud event of type %s", e.Type())
+	}
 	evt, err := json.Marshal(event)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not serialize cloud event of type %s", e.Type())
