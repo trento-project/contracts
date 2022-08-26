@@ -28,7 +28,61 @@ defmodule Trento.Events.Checks.V1.ExecutionCompleted do
                     @derive Jason.Encoder
                     @required_fields [:name, :return_value, :type]
                     embedded_schema do
-                      [field(:name, :string), nil, field(:type, :string)]
+                      [
+                        field(:name, :string),
+                        (
+                          defmodule ReturnValue do
+                            use Ecto.Type
+                            @moduledoc false
+                            def type do
+                              :return_value
+                            end
+
+                            [
+                              def cast(value) when Elixir.Kernel.is_number(value) do
+                                {:ok, value}
+                              end,
+                              def cast(value) when Elixir.Kernel.is_boolean(value) do
+                                {:ok, value}
+                              end,
+                              def cast(value) when Elixir.Kernel.is_bitstring(value) do
+                                {:ok, value}
+                              end
+                            ]
+
+                            def cast(_) do
+                              :error
+                            end
+
+                            [
+                              def dump(value) when Elixir.Kernel.is_number(value) do
+                                value
+                              end,
+                              def dump(value) when Elixir.Kernel.is_boolean(value) do
+                                value
+                              end,
+                              def dump(value) when Elixir.Kernel.is_bitstring(value) do
+                                value
+                              end
+                            ]
+
+                            [
+                              def load(value) when Elixir.Kernel.is_number(value) do
+                                {:ok, value}
+                              end,
+                              def load(value) when Elixir.Kernel.is_boolean(value) do
+                                {:ok, value}
+                              end,
+                              def load(value) when Elixir.Kernel.is_bitstring(value) do
+                                {:ok, value}
+                              end
+                            ]
+                          end
+
+                          field(:return_value, ReturnValue)
+                        ),
+                        field(:type, :string)
+                      ]
                     end
 
                     (
