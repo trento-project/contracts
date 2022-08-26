@@ -2,6 +2,7 @@ defmodule Trento.Events.Checks.V1.FactsRequest do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed
+  @moduledoc false
   @primary_key false
   @required_fields [:execution_id, :facts]
   @derive Jason.Encoder

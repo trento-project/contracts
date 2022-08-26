@@ -18,6 +18,7 @@ defmodule Mix.Tasks.Contracts.Generate do
             use Ecto.Schema
             import Ecto.Changeset
             import PolymorphicEmbed
+            @moduledoc false
             @primary_key false
             @required_fields unquote(required)
 
@@ -167,6 +168,7 @@ defmodule Mix.Tasks.Contracts.Generate do
                       use Ecto.Schema
                       @primary_key false
                       @derive Jason.Encoder
+                      @moduledoc false
                       @required_fields unquote(required)
                       embedded_schema do
                         unquote(Enum.map(properties, &get_field/1))
@@ -256,6 +258,7 @@ defmodule Mix.Tasks.Contracts.Generate do
                       use Ecto.Schema
                       @primary_key false
                       @derive Jason.Encoder
+                      @moduledoc false
                       @required_fields unquote(required)
                       embedded_schema do
                         unquote(Enum.map(properties, &get_field/1))
@@ -329,8 +332,7 @@ defmodule Mix.Tasks.Contracts.Generate do
     module_name =
       name
       |> String.split(".")
-      |> Enum.map(&Macro.camelize/1)
-      |> Enum.join(".")
+      |> Enum.map_join(".", &Macro.camelize/1)
 
     "Trento.Events.#{Macro.camelize(module_name)}"
   end

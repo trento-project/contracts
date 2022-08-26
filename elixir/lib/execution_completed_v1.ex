@@ -2,6 +2,7 @@ defmodule Trento.Events.Checks.V1.ExecutionCompleted do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed
+  @moduledoc false
   @primary_key false
   @required_fields [:execution_id, :group_id, :result, :check_results]
   @derive Jason.Encoder
@@ -26,6 +27,7 @@ defmodule Trento.Events.Checks.V1.ExecutionCompleted do
                     use Ecto.Schema
                     @primary_key false
                     @derive Jason.Encoder
+                    @moduledoc false
                     @required_fields [:name, :return_value, :type]
                     embedded_schema do
                       [
@@ -202,6 +204,7 @@ defmodule Trento.Events.Checks.V1.ExecutionCompleted do
                     use Ecto.Schema
                     @primary_key false
                     @derive Jason.Encoder
+                    @moduledoc false
                     @required_fields [:name, :message, :type]
                     embedded_schema do
                       [field(:message, :string), field(:name, :string), field(:type, :string)]
