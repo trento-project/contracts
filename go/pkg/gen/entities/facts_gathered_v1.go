@@ -113,7 +113,7 @@ func NewFactsGatheredV1FromJsonCloudEvent(rawJson []byte) (*FactsGatheredV1, err
 
 	event := cloudevents.NewEvent()
 
-	err := json.Unmarshal(rawJson, &decoded)
+	err := json.Unmarshal(rawJson, &event)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not serialize the json into a cloud event")
 	}
