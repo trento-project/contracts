@@ -24,7 +24,8 @@ defmodule TrentoContracts.MixProject do
       {:ecto, "~> 3.8"},
       {:jason, "~> 1.3"},
       {:json_schema, "~> 0.4"},
-      {:proper_case, "~> 1.3"}
+      {:proper_case, "~> 1.3"},
+      {:polymorphic_embed, "~> 3.0"}
     ]
   end
 end

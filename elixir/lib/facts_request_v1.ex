@@ -1,6 +1,7 @@
 defmodule Trento.Events.Checks.V1.FactsRequest do
   use Ecto.Schema
   import Ecto.Changeset
+  import PolymorphicEmbed
   @primary_key false
   @required_fields [:execution_id, :facts]
   @derive Jason.Encoder
@@ -10,6 +11,8 @@ defmodule Trento.Events.Checks.V1.FactsRequest do
       embeds_many(:facts, Facts, primary_key: false) do
         @derive Jason.Encoder
         @required_fields [:check_id, :name, :gatherer]
+        import PolymorphicEmbed
+
         [
           field(:argument, :string),
           field(:check_id, :string),
@@ -49,8 +52,13 @@ defmodule Trento.Events.Checks.V1.FactsRequest do
             changeset =
               struct |> cast(params, fields()) |> validate_required_fields(@required_fields)
 
-            Enum.reduce(embedded_fields(), changeset, fn field, changeset ->
-              cast_and_validate_required_embed(changeset, field, @required_fields)
+            embedded_cast_changeset =
+              Enum.reduce(embedded_fields(), changeset, fn field, changeset ->
+                cast_and_validate_required_embed(changeset, field, @required_fields)
+              end)
+
+            Enum.reduce(polymorphic_fields(), embedded_cast_changeset, fn field, changeset ->
+              cast_polymorphic_embed(changeset, field)
             end)
           end
 
@@ -93,12 +101,24 @@ defmodule Trento.Events.Checks.V1.FactsRequest do
             {:ok, []}
           end
 
-          def fields do
-            __MODULE__.__schema__(:fields) -- __MODULE__.__schema__(:embeds)
+          def fields() do
+            non_embedded_fields = __MODULE__.__schema__(:fields) -- __MODULE__.__schema__(:embeds)
+            non_embedded_fields -- polymorphic_fields()
           end
 
           def embedded_fields do
             __MODULE__.__schema__(:embeds)
+          end
+
+          def polymorphic_fields() do
+            __MODULE__.__schema__(:fields)
+            |> Enum.filter(fn field ->
+              try do
+                [_ | _] = PolymorphicEmbed.types(__MODULE__, field)
+              rescue
+                _ -> false
+              end
+            end)
           end
 
           defoverridable changeset: 2
@@ -138,8 +158,13 @@ defmodule Trento.Events.Checks.V1.FactsRequest do
     def changeset(struct, params) do
       changeset = struct |> cast(params, fields()) |> validate_required_fields(@required_fields)
 
-      Enum.reduce(embedded_fields(), changeset, fn field, changeset ->
-        cast_and_validate_required_embed(changeset, field, @required_fields)
+      embedded_cast_changeset =
+        Enum.reduce(embedded_fields(), changeset, fn field, changeset ->
+          cast_and_validate_required_embed(changeset, field, @required_fields)
+        end)
+
+      Enum.reduce(polymorphic_fields(), embedded_cast_changeset, fn field, changeset ->
+        cast_polymorphic_embed(changeset, field)
       end)
     end
 
@@ -182,12 +207,24 @@ defmodule Trento.Events.Checks.V1.FactsRequest do
       {:ok, []}
     end
 
-    def fields do
-      __MODULE__.__schema__(:fields) -- __MODULE__.__schema__(:embeds)
+    def fields() do
+      non_embedded_fields = __MODULE__.__schema__(:fields) -- __MODULE__.__schema__(:embeds)
+      non_embedded_fields -- polymorphic_fields()
     end
 
     def embedded_fields do
       __MODULE__.__schema__(:embeds)
+    end
+
+    def polymorphic_fields() do
+      __MODULE__.__schema__(:fields)
+      |> Enum.filter(fn field ->
+        try do
+          [_ | _] = PolymorphicEmbed.types(__MODULE__, field)
+        rescue
+          _ -> false
+        end
+      end)
     end
 
     defoverridable changeset: 2
