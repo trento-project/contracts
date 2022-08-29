@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/cdimonaco/contracts/go/pkg/validator"
+	"github.com/trento-project/contracts/go/pkg/validator"
 	"github.com/xeipuuv/gojsonschema"
 	"go.uber.org/multierr"
 

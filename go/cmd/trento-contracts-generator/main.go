@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/CDimonaco/generate"
-	"github.com/cdimonaco/contracts/go/internal/generator"
+	"github.com/trento-project/contracts/go/internal/generator"
 )
 
 var (
