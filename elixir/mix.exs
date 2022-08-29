@@ -21,10 +21,12 @@ defmodule TrentoContracts.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ecto, "~> 3.8"},
       {:jason, "~> 1.3"},
       {:json_schema, "~> 0.4"},
-      {:proper_case, "~> 1.3"}
+      {:proper_case, "~> 1.3"},
+      {:polymorphic_embed, "~> 3.0"}
     ]
   end
 end

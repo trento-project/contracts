@@ -17,10 +17,12 @@ defmodule Mix.Tasks.Contracts.Generate do
           defmodule unquote(Module.concat([module_name])) do
             use Ecto.Schema
             import Ecto.Changeset
-
+            import PolymorphicEmbed
+            @moduledoc false
             @primary_key false
             @required_fields unquote(required)
 
+            @derive Jason.Encoder
             embedded_schema do
               unquote(Enum.map(json_schema["properties"], &get_field/1))
             end
@@ -40,11 +42,11 @@ defmodule Mix.Tasks.Contracts.Generate do
 
     quote do
       embeds_one unquote(String.to_atom(k)), unquote(Module.concat([Macro.camelize(k)])) do
+        @derive Jason.Encoder
         @required_fields unquote(required)
 
+        unquote(Enum.map(properties, &get_field/1))
         unquote(trento_contract_functions())
-
-          unquote(Enum.map(properties, &get_field/1))
       end
     end
   end
@@ -61,7 +63,10 @@ defmodule Mix.Tasks.Contracts.Generate do
     quote do
       embeds_many unquote(String.to_atom(k)), unquote(Module.concat([Macro.camelize(k)])),
         primary_key: false do
+        @derive Jason.Encoder
         @required_fields unquote(required)
+
+        import PolymorphicEmbed
 
         unquote(Enum.map(properties, &get_field/1))
 
@@ -72,16 +77,16 @@ defmodule Mix.Tasks.Contracts.Generate do
 
   def get_field({k, %{"type" => types}}) when is_list(types) do
     union_type_module_name = Macro.camelize(k)
+    actual_types = Enum.filter(types, fn type -> type != "null" end)
 
     quote do
       defmodule unquote(Module.concat([union_type_module_name])) do
         use Ecto.Type
-
         @moduledoc false
         def type, do: unquote(String.to_atom(k))
 
         unquote(
-          Enum.map(types, fn type ->
+          Enum.map(actual_types, fn type ->
             quote do
               def cast(value) when unquote(Module.concat([get_guard(type)]))(value) do
                 {:ok, value}
@@ -93,7 +98,7 @@ defmodule Mix.Tasks.Contracts.Generate do
         def cast(_), do: :error
 
         unquote(
-          Enum.map(types, fn type ->
+          Enum.map(actual_types, fn type ->
             quote do
               def dump(value) when unquote(Module.concat([get_guard(type)]))(value) do
                 value
@@ -103,7 +108,7 @@ defmodule Mix.Tasks.Contracts.Generate do
         )
 
         unquote(
-          Enum.map(types, fn type ->
+          Enum.map(actual_types, fn type ->
             quote do
               def load(value) when unquote(Module.concat([get_guard(type)]))(value) do
                 {:ok, value}
@@ -114,6 +119,186 @@ defmodule Mix.Tasks.Contracts.Generate do
       end
 
       field(unquote(String.to_atom(k)), unquote(Module.concat([union_type_module_name])))
+    end
+  end
+
+  def get_field({k, %{"type" => "array", "items" => %{"oneOf" => types}}}) when is_list(types) do
+    case only_primitives?(types) do
+      true ->
+        list_of_primitive_types = Enum.map(types, fn %{"type" => type} -> type end)
+        get_field({k, %{"type" => list_of_primitive_types}})
+
+      false ->
+        generated_types =
+          Enum.map(types, fn type ->
+            type_name =
+              case type do
+                %{"title" => title, "type" => "object", "properties" => _properties} ->
+                  title |> ProperCase.snake_case() |> String.to_atom()
+
+                _ ->
+                  nil
+              end
+
+            module_name =
+              case type do
+                %{"title" => title, "type" => "object", "properties" => _properties} ->
+                  title
+
+                _ ->
+                  nil
+              end
+
+            properties =
+              case type do
+                %{"title" => _title, "type" => "object", "properties" => properties} ->
+                  properties |> Map.keys() |> Enum.map(&String.to_atom/1)
+
+                _ ->
+                  nil
+              end
+
+            type_code =
+              case type do
+                %{"title" => title, "properties" => properties} ->
+                  required = get_required(type)
+
+                  quote do
+                    defmodule unquote(Module.concat([title])) do
+                      use Ecto.Schema
+                      @primary_key false
+                      @derive Jason.Encoder
+                      @moduledoc false
+                      @required_fields unquote(required)
+                      embedded_schema do
+                        unquote(Enum.map(properties, &get_field/1))
+                      end
+
+                      unquote(trento_contract_functions())
+                    end
+                  end
+
+                _ ->
+                  quote do
+                  end
+              end
+
+            {type_name, module_name, type_code, properties}
+          end)
+
+        quote do
+          unquote(Enum.map(generated_types, fn {_, _, type_code, _} -> type_code end))
+
+          polymorphic_embeds_many(
+            unquote(String.to_atom(k)),
+            types:
+              unquote(
+                generated_types
+                |> Enum.filter(fn {type_name, _, _, _} -> not is_nil(type_name) end)
+                |> Enum.map(fn {type_name, module_name, _type_code, properties} ->
+                  quote do
+                    {unquote(type_name),
+                     [
+                       module: unquote(Module.concat([module_name])),
+                       identify_by_fields: unquote(properties)
+                     ]}
+                  end
+                end)
+              ),
+            on_type_not_found: :raise,
+            on_replace: :delete
+          )
+        end
+    end
+  end
+
+  def get_field({k, %{"oneOf" => types}}) when is_list(types) do
+    case only_primitives?(types) do
+      true ->
+        list_of_primitive_types = Enum.map(types, fn %{"type" => type} -> type end)
+        get_field({k, %{"type" => list_of_primitive_types}})
+
+      false ->
+        generated_types =
+          Enum.map(types, fn type ->
+            type_name =
+              case type do
+                %{"title" => title, "type" => "object", "properties" => _properties} ->
+                  title |> ProperCase.snake_case() |> String.to_atom()
+
+                _ ->
+                  nil
+              end
+
+            module_name =
+              case type do
+                %{"title" => title, "type" => "object", "properties" => _properties} ->
+                  title
+
+                _ ->
+                  nil
+              end
+
+            properties =
+              case type do
+                %{"title" => _title, "type" => "object", "properties" => properties} ->
+                  properties |> Map.keys() |> Enum.map(&String.to_atom/1)
+
+                _ ->
+                  nil
+              end
+
+            type_code =
+              case type do
+                %{"title" => title, "properties" => properties} ->
+                  required = get_required(type)
+
+                  quote do
+                    defmodule unquote(Module.concat([title])) do
+                      use Ecto.Schema
+                      @primary_key false
+                      @derive Jason.Encoder
+                      @moduledoc false
+                      @required_fields unquote(required)
+                      embedded_schema do
+                        unquote(Enum.map(properties, &get_field/1))
+                      end
+
+                      unquote(trento_contract_functions())
+                    end
+                  end
+
+                _ ->
+                  quote do
+                  end
+              end
+
+            {type_name, module_name, type_code, properties}
+          end)
+
+        quote do
+          unquote(Enum.map(generated_types, fn {_, _, type_code, _} -> type_code end))
+
+          polymorphic_embeds_one(
+            unquote(String.to_atom(k)),
+            types:
+              unquote(
+                generated_types
+                |> Enum.filter(fn {type_name, _, _, _} -> not is_nil(type_name) end)
+                |> Enum.map(fn {type_name, module_name, _type_code, properties} ->
+                  quote do
+                    {unquote(type_name),
+                     [
+                       module: unquote(Module.concat([module_name])),
+                       identify_by_fields: unquote(properties)
+                     ]}
+                  end
+                end)
+              ),
+            on_type_not_found: :raise,
+            on_replace: :delete
+          )
+        end
     end
   end
 
@@ -147,8 +332,7 @@ defmodule Mix.Tasks.Contracts.Generate do
     module_name =
       name
       |> String.split(".")
-      |> Enum.map(&Macro.camelize/1)
-      |> Enum.join(".")
+      |> Enum.map_join(".", &Macro.camelize/1)
 
     "Trento.Events.#{Macro.camelize(module_name)}"
   end
@@ -156,6 +340,11 @@ defmodule Mix.Tasks.Contracts.Generate do
   def get_guard("string"), do: "Kernel.is_bitstring"
   def get_guard("number"), do: "Kernel.is_number"
   def get_guard("boolean"), do: "Kernel.is_boolean"
+
+  def only_primitives?(types) do
+    types_list = types |> Enum.map(fn %{"type" => type} -> type end)
+    "object" not in types_list
+  end
 
   def trento_contract_functions() do
     quote do
@@ -211,8 +400,13 @@ defmodule Mix.Tasks.Contracts.Generate do
           |> cast(params, fields())
           |> validate_required_fields(@required_fields)
 
-        Enum.reduce(embedded_fields(), changeset, fn field, changeset ->
-          cast_and_validate_required_embed(changeset, field, @required_fields)
+        embedded_cast_changeset =
+          Enum.reduce(embedded_fields(), changeset, fn field, changeset ->
+            cast_and_validate_required_embed(changeset, field, @required_fields)
+          end)
+
+        Enum.reduce(polymorphic_fields(), embedded_cast_changeset, fn field, changeset ->
+          cast_polymorphic_embed(changeset, field)
         end)
       end
 
@@ -247,9 +441,23 @@ defmodule Mix.Tasks.Contracts.Generate do
       def decoding_results(%{ok: decoding_results}), do: {:ok, decoding_results}
       def decoding_results(_), do: {:ok, []}
 
-      def fields, do: __MODULE__.__schema__(:fields) -- __MODULE__.__schema__(:embeds)
+      def fields() do
+        non_embedded_fields = __MODULE__.__schema__(:fields) -- __MODULE__.__schema__(:embeds)
+        non_embedded_fields -- polymorphic_fields()
+      end
 
       def embedded_fields, do: __MODULE__.__schema__(:embeds)
+
+      def polymorphic_fields() do
+        __MODULE__.__schema__(:fields)
+        |> Enum.filter(fn field ->
+          try do
+            [_ | _] = PolymorphicEmbed.types(__MODULE__, field)
+          rescue
+            _ -> false
+          end
+        end)
+      end
 
       defoverridable changeset: 2
     end
