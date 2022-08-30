@@ -1,5 +1,7 @@
 github.com/CDimonaco/generate v1.1.0 h1:51GxtzSw7E4KvrOgNVM1fq6PPyd1m2UmiyacmxM+J6Q=
 github.com/CDimonaco/generate v1.1.0/go.mod h1:QyPl1TXcmwCSnxNnTfxqU12phhwaVvIqeIdWI24tJak=
+github.com/CDimonaco/generate v1.2.0 h1:orxPp862Kjh970haY+1fwO2XzfjAk5jbIp9aOlqfNj4=
+github.com/CDimonaco/generate v1.2.0/go.mod h1:QyPl1TXcmwCSnxNnTfxqU12phhwaVvIqeIdWI24tJak=
 github.com/cloudevents/sdk-go/v2 v2.6.0 h1:yp6zLEvhXSi6P25zzfgORgFI0quG2/NXoH9QoHzvKn8=
 github.com/cloudevents/sdk-go/v2 v2.6.0/go.mod h1:nlXhgFkf0uTopxmRXalyMwS2LG70cRGPrxzmjJgSG0U=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
