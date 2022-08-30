@@ -190,7 +190,23 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
                         __MODULE__.__schema__(:fields)
                         |> Enum.filter(fn field ->
                           try do
-                            [_ | _] = PolymorphicEmbed.types(__MODULE__, field)
+                            [_ | _] =
+                              __MODULE__.__schema__(:type, field)
+                              |> case do
+                                {:parameterized, PolymorphicEmbed, options} ->
+                                  Map.put(options, :array?, false)
+
+                                {:array, {:parameterized, PolymorphicEmbed, options}} ->
+                                  Map.put(options, :array?, true)
+
+                                {_, {:parameterized, PolymorphicEmbed, options}} ->
+                                  Map.put(options, :array?, false)
+
+                                nil ->
+                                  raise ArgumentError, "#{field} is not a polymorphic embed"
+                              end
+                              |> Map.get(:types_metadata)
+                              |> Enum.map(fn %{type: type} -> type end)
                           rescue
                             _ -> false
                           end
@@ -313,7 +329,23 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
                         __MODULE__.__schema__(:fields)
                         |> Enum.filter(fn field ->
                           try do
-                            [_ | _] = PolymorphicEmbed.types(__MODULE__, field)
+                            [_ | _] =
+                              __MODULE__.__schema__(:type, field)
+                              |> case do
+                                {:parameterized, PolymorphicEmbed, options} ->
+                                  Map.put(options, :array?, false)
+
+                                {:array, {:parameterized, PolymorphicEmbed, options}} ->
+                                  Map.put(options, :array?, true)
+
+                                {_, {:parameterized, PolymorphicEmbed, options}} ->
+                                  Map.put(options, :array?, false)
+
+                                nil ->
+                                  raise ArgumentError, "#{field} is not a polymorphic embed"
+                              end
+                              |> Map.get(:types_metadata)
+                              |> Enum.map(fn %{type: type} -> type end)
                           rescue
                             _ -> false
                           end
@@ -442,7 +474,23 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
                 __MODULE__.__schema__(:fields)
                 |> Enum.filter(fn field ->
                   try do
-                    [_ | _] = PolymorphicEmbed.types(__MODULE__, field)
+                    [_ | _] =
+                      __MODULE__.__schema__(:type, field)
+                      |> case do
+                        {:parameterized, PolymorphicEmbed, options} ->
+                          Map.put(options, :array?, false)
+
+                        {:array, {:parameterized, PolymorphicEmbed, options}} ->
+                          Map.put(options, :array?, true)
+
+                        {_, {:parameterized, PolymorphicEmbed, options}} ->
+                          Map.put(options, :array?, false)
+
+                        nil ->
+                          raise ArgumentError, "#{field} is not a polymorphic embed"
+                      end
+                      |> Map.get(:types_metadata)
+                      |> Enum.map(fn %{type: type} -> type end)
                   rescue
                     _ -> false
                   end
@@ -558,7 +606,23 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
                 __MODULE__.__schema__(:fields)
                 |> Enum.filter(fn field ->
                   try do
-                    [_ | _] = PolymorphicEmbed.types(__MODULE__, field)
+                    [_ | _] =
+                      __MODULE__.__schema__(:type, field)
+                      |> case do
+                        {:parameterized, PolymorphicEmbed, options} ->
+                          Map.put(options, :array?, false)
+
+                        {:array, {:parameterized, PolymorphicEmbed, options}} ->
+                          Map.put(options, :array?, true)
+
+                        {_, {:parameterized, PolymorphicEmbed, options}} ->
+                          Map.put(options, :array?, false)
+
+                        nil ->
+                          raise ArgumentError, "#{field} is not a polymorphic embed"
+                      end
+                      |> Map.get(:types_metadata)
+                      |> Enum.map(fn %{type: type} -> type end)
                   rescue
                     _ -> false
                   end
@@ -665,7 +729,23 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
             __MODULE__.__schema__(:fields)
             |> Enum.filter(fn field ->
               try do
-                [_ | _] = PolymorphicEmbed.types(__MODULE__, field)
+                [_ | _] =
+                  __MODULE__.__schema__(:type, field)
+                  |> case do
+                    {:parameterized, PolymorphicEmbed, options} ->
+                      Map.put(options, :array?, false)
+
+                    {:array, {:parameterized, PolymorphicEmbed, options}} ->
+                      Map.put(options, :array?, true)
+
+                    {_, {:parameterized, PolymorphicEmbed, options}} ->
+                      Map.put(options, :array?, false)
+
+                    nil ->
+                      raise ArgumentError, "#{field} is not a polymorphic embed"
+                  end
+                  |> Map.get(:types_metadata)
+                  |> Enum.map(fn %{type: type} -> type end)
               rescue
                 _ -> false
               end
@@ -774,7 +854,23 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
       __MODULE__.__schema__(:fields)
       |> Enum.filter(fn field ->
         try do
-          [_ | _] = PolymorphicEmbed.types(__MODULE__, field)
+          [_ | _] =
+            __MODULE__.__schema__(:type, field)
+            |> case do
+              {:parameterized, PolymorphicEmbed, options} ->
+                Map.put(options, :array?, false)
+
+              {:array, {:parameterized, PolymorphicEmbed, options}} ->
+                Map.put(options, :array?, true)
+
+              {_, {:parameterized, PolymorphicEmbed, options}} ->
+                Map.put(options, :array?, false)
+
+              nil ->
+                raise ArgumentError, "#{field} is not a polymorphic embed"
+            end
+            |> Map.get(:types_metadata)
+            |> Enum.map(fn %{type: type} -> type end)
         rescue
           _ -> false
         end
