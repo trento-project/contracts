@@ -3,7 +3,7 @@ module github.com/trento-project/contracts/go
 go 1.18
 
 require (
-	github.com/CDimonaco/generate v1.1.0
+	github.com/CDimonaco/generate v1.2.0
 	github.com/cloudevents/sdk-go/v2 v2.6.0
 	github.com/google/uuid v1.1.1
 	github.com/pkg/errors v0.9.1
