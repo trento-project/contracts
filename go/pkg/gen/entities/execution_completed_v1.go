@@ -19,7 +19,7 @@ import (
 type AgentCheckResult struct {
   AgentId string `json:"agent_id"`
   ExpectationEvaluations []interface{} `json:"expectation_evaluations"`
-  Facts *GatheredFacts `json:"facts"`
+  Facts map[string]interface{} `json:"facts"`
 }
 
 // CheckResult 
@@ -43,10 +43,6 @@ type ExpectationResult struct {
   Name string `json:"name"`
   Result bool `json:"result"`
   Type string `json:"type"`
-}
-
-// GatheredFacts 
-type GatheredFacts struct {
 }
 
 func NewExecutionCompletedV1FromJson(rawJson []byte) (*ExecutionCompletedV1, error) {
