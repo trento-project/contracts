@@ -15,22 +15,30 @@ import (
 	"github.com/pkg/errors"
 )
 
-// FactsItems 
-type FactsItems struct {
-  Argument string `json:"argument,omitempty"`
+// AgentFacts 
+type AgentFacts struct {
+  AgentId string `json:"agent_id"`
+  Facts []*FactDefinition `json:"facts"`
+}
+
+// FactDefinition 
+type FactDefinition struct {
+  Argument string `json:"argument"`
   CheckId string `json:"check_id"`
   Gatherer string `json:"gatherer"`
   Name string `json:"name"`
 }
 
-// FactsRequestV1 
-type FactsRequestV1 struct {
+// FactsGatheringRequestedV1 
+type FactsGatheringRequestedV1 struct {
   ExecutionId string `json:"execution_id"`
-  Facts []*FactsItems `json:"facts"`
+  Facts []*AgentFacts `json:"facts"`
+  GroupId string `json:"group_id"`
+  Targets []string `json:"targets"`
 }
 
-func NewFactsRequestV1FromJson(rawJson []byte) (*FactsRequestV1, error) {
-	var event FactsRequestV1
+func NewFactsGatheringRequestedV1FromJson(rawJson []byte) (*FactsGatheringRequestedV1, error) {
+	var event FactsGatheringRequestedV1
 	err := json.Unmarshal(rawJson, &event)
 	if err != nil {
 		return nil, err
@@ -44,8 +52,8 @@ func NewFactsRequestV1FromJson(rawJson []byte) (*FactsRequestV1, error) {
 	return &event, nil
 }
 
-func (e *FactsRequestV1) Valid() error {
-	schema, err := validator.GetSchema("schemas/trento.checks.v1.wanda.FactsRequest.schema.json")
+func (e *FactsGatheringRequestedV1) Valid() error {
+	schema, err := validator.GetSchema("schemas/trento.checks.v1.wanda.FactsGatheringRequested.schema.json")
 	if err != nil {
 		return err
 	}
@@ -64,17 +72,17 @@ func (e *FactsRequestV1) Valid() error {
 	return validationError
 }
 
-func (e *FactsRequestV1) Source() string {
+func (e *FactsGatheringRequestedV1) Source() string {
 	return "trento/wanda"
 }
 
 
-func (e *FactsRequestV1) Type() string {
-	return "trento.checks.v1.wanda.FactsRequest"
+func (e *FactsGatheringRequestedV1) Type() string {
+	return "trento.checks.v1.wanda.FactsGatheringRequested"
 }
 
 
-func (e *FactsRequestV1) SerializeCloudEvent() ([]byte, error) {
+func (e *FactsGatheringRequestedV1) SerializeCloudEvent() ([]byte, error) {
 	err := e.Valid()
 	if err != nil {
 		return nil, errors.Wrap(err, "the entity is invalid")
@@ -103,8 +111,8 @@ func (e *FactsRequestV1) SerializeCloudEvent() ([]byte, error) {
 	return evt, nil
 }
 
-func NewFactsRequestV1FromJsonCloudEvent(rawJson []byte) (*FactsRequestV1, error) {
-	var decoded FactsRequestV1
+func NewFactsGatheringRequestedV1FromJsonCloudEvent(rawJson []byte) (*FactsGatheringRequestedV1, error) {
+	var decoded FactsGatheringRequestedV1
 
 	event := cloudevents.NewEvent()
 
