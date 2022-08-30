@@ -1,4 +1,4 @@
-defmodule Trento.Events.Checks.V1.FactsGathered do
+defmodule Trento.Events.Checks.V1.Agent.FactsGathered do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed

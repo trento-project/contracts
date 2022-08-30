@@ -1,4 +1,4 @@
-defmodule Trento.Events.Checks.V1.FactsRequest do
+defmodule Trento.Events.Checks.V1.Wanda.FactsRequest do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed
