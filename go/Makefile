@@ -9,9 +9,6 @@ go-generate: $(SCHEMAS)/*.json
 		go run cmd/trento-contracts-generator/main.go -fileName $${schema_name} $${file}; \
 	done
 
-add-schema:
-	cat $(SCHEMAS)/schema.json.example | envsubst > $(SCHEMAS)/trento.$(project).v$(version).$(source).$(factname).schema.json
-
 make-schemas:
 	cp $(SCHEMAS)/*.json ./pkg/validator/schemas/
 
