@@ -24,7 +24,8 @@ jobs:
       - name: Check for uncommited schema changes
         run: |
           git add -N go/
-          git diff --quiet || exit 1 && exit 0
+          git diff
+          git diff --quiet
       - name: Git status
         run: git status
 
@@ -44,6 +45,7 @@ jobs:
       - name: Check for uncommited schema changes
         run: |
           git add -N elixir/
-          git diff --quiet || exit 1 && exit 0
+          git diff
+          git diff --quiet
       - name: Git status
         run: git status
