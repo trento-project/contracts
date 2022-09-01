@@ -18,7 +18,7 @@ import (
 // ExecutionRequestedV1 
 type ExecutionRequestedV1 struct {
   ExecutionId string `json:"execution_id"`
-  GroupId string `json:"group_id,omitempty"`
+  GroupId string `json:"group_id"`
   Targets []*Target `json:"targets"`
 }
 
