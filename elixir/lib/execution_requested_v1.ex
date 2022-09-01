@@ -4,7 +4,7 @@ defmodule Trento.Events.Checks.V1.Web.ExecutionRequested do
   import PolymorphicEmbed
   @moduledoc false
   @primary_key false
-  @required_fields [:execution_id, :agent_id, :targets]
+  @required_fields [:execution_id, :group_id, :targets]
   @derive Jason.Encoder
   embedded_schema do
     [
