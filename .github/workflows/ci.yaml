@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  ELIXIR_VERSION: 1.13.1
+  OTP_VERSION: 24
+
 jobs:
   check-go-contracts:
     runs-on: ubuntu-20.04
@@ -20,6 +24,28 @@ jobs:
       - name: Check for uncommited schema changes
         run: |
           git add -N go/
-          git diff --quiet || exit 1 && exit 0
+          git diff
+          git diff --quiet
+      - name: Git status
+        run: git status
+
+  check-elixir-contracts:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+        env:
+          ImageOS: ubuntu20
+      - name: generate contracts
+        run: cd elixir && make elixir-generate
+      - name: Check for uncommited schema changes
+        run: |
+          git add -N elixir/
+          git diff
+          git diff --quiet
       - name: Git status
         run: git status
