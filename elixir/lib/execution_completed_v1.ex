@@ -372,7 +372,7 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
                   on_replace: :delete
                 )
               ),
-              nil
+              field(:facts, :map)
             ]
 
             (

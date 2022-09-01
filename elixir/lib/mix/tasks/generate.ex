@@ -302,6 +302,19 @@ defmodule Mix.Tasks.Contracts.Generate do
     end
   end
 
+  def get_field(
+        {k,
+         %{
+           "type" => "object",
+           "propertyNames" => _property_names,
+           "patternProperties" => _pattern_properties
+         }}
+      ) do
+    quote do
+      field(unquote(String.to_atom(k)), :map)
+    end
+  end
+
   def get_field({k, %{"type" => "string"}}) do
     quote do
       field(unquote(String.to_atom(k)), :string)
