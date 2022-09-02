@@ -24,7 +24,7 @@ defmodule TrentoContracts.MixProject do
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ecto, "~> 3.8"},
       {:jason, "~> 1.3"},
-      {:json_schema, "~> 0.4"},
+      {:ex_json_schema, "~> 0.9.1"},
       {:elixir_uuid, "~> 1.2"},
       # Cloud events require a minor version of typed struct, json schema the the 0.3.0, we choose 0.3.0
       {:typed_struct, "~> 0.3", override: true},

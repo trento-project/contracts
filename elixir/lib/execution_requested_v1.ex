@@ -2,6 +2,7 @@ defmodule Trento.Events.Checks.V1.Web.ExecutionRequested do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed
+  alias Trento.Events.JsonSchema
   alias Cloudevents.Format.V_1_0.Event, as: CloudEvent
   @version "v1"
   @source "trento/web"
@@ -146,15 +147,8 @@ defmodule Trento.Events.Checks.V1.Web.ExecutionRequested do
   (
     @doc "  Serialize and return a module struct from a cloud event json\n"
     def serialize_from_cloud_event(json_cloud_event) do
-      case Cloudevents.from_json(json_cloud_event) do
-        {:ok, %CloudEvent{data: data, type: @event_type}} ->
-          __MODULE__.new(data)
-
-        {:ok, %CloudEvent{type: event_type}} ->
-          {:error, "invalid event type, provided #{event_type}"}
-
-        error ->
-          error
+      with {:ok, event} <- Cloudevents.from_json(json_cloud_event) do
+        create_contract_from_cloud_event(event)
       end
     end
 
@@ -170,6 +164,20 @@ defmodule Trento.Events.Checks.V1.Web.ExecutionRequested do
         {:ok, event} -> Cloudevents.to_json(event)
         error -> error
       end
+    end
+
+    defp validate_with_schema(data) do
+      JsonSchema.validate(@event_type, data)
+    end
+
+    defp create_contract_from_cloud_event(%CloudEvent{data: data, type: @event_type}) do
+      with :ok <- validate_with_schema(data) do
+        __MODULE__.new(data)
+      end
+    end
+
+    defp create_contract_from_cloud_event(%CloudEvent{type: event_type}) do
+      {:error, "invalid event type, provided #{event_type}"}
     end
   )
 

@@ -22,6 +22,7 @@ defmodule Mix.Tasks.Contracts.Generate do
             import Ecto.Changeset
             import PolymorphicEmbed
 
+            alias Trento.Events.JsonSchema
             alias Cloudevents.Format.V_1_0.Event, as: CloudEvent
 
             @version unquote(version)
@@ -387,15 +388,8 @@ defmodule Mix.Tasks.Contracts.Generate do
         Serialize and return a module struct from a cloud event json
       """
       def serialize_from_cloud_event(json_cloud_event) do
-        case Cloudevents.from_json(json_cloud_event) do
-          {:ok, %CloudEvent{data: data, type: @event_type}} ->
-            __MODULE__.new(data)
-
-          {:ok, %CloudEvent{type: event_type}} ->
-            {:error, "invalid event type, provided #{event_type}"}
-
-          error ->
-            error
+        with {:ok, event} <- Cloudevents.from_json(json_cloud_event) do
+          create_contract_from_cloud_event(event)
         end
       end
 
@@ -416,6 +410,20 @@ defmodule Mix.Tasks.Contracts.Generate do
           error ->
             error
         end
+      end
+
+      defp validate_with_schema(data) do
+        JsonSchema.validate(@event_type, data)
+      end
+
+      defp create_contract_from_cloud_event(%CloudEvent{data: data, type: @event_type}) do
+        with :ok <- validate_with_schema(data) do
+          __MODULE__.new(data)
+        end
+      end
+
+      defp create_contract_from_cloud_event(%CloudEvent{type: event_type}) do
+        {:error, "invalid event type, provided #{event_type}"}
       end
     end
   end
