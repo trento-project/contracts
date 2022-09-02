@@ -8,5 +8,8 @@ elixir-generate: $(SCHEMAS)/*.json
 	mix contracts.generate
 	mix format
 
+make-schemas:
+	cp $(SCHEMAS)/*.json ./priv/schemas/
+
 clean:
 	rm -f ./lib/*.ex

@@ -2,7 +2,7 @@ defmodule Mix.Tasks.Contracts.Generate do
   use Mix.Task
 
   def run(_) do
-    schemas_paths = Path.wildcard("../schema/*.schema.json")
+    schemas_paths = Path.wildcard("./priv/schemas/*.schema.json")
 
     schemas_paths
     |> Enum.map(fn path -> {path, File.read!(path)} end)

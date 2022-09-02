@@ -285,6 +285,7 @@ defmodule Trento.Events.Checks.V1.Wanda.FactsGatheringRequested do
   end
 
   (
+    @doc "  Serialize and return a module struct from a cloud event json\n"
     def serialize_from_cloud_event(json_cloud_event) do
       case Cloudevents.from_json(json_cloud_event) do
         {:ok, %CloudEvent{data: data, type: @event_type}} ->
@@ -298,10 +299,11 @@ defmodule Trento.Events.Checks.V1.Wanda.FactsGatheringRequested do
       end
     end
 
+    @doc "  Serialize and return a cloud event json from a contract struct\n"
     def serialize_to_cloud_event(contract) do
       case CloudEvent.from_map(%{
              "specversion" => "1.0",
-             "id" => "id",
+             "id" => UUID.uuid4(),
              "type" => @event_type,
              "source" => @source,
              "data" => contract
