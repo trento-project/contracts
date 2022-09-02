@@ -2,6 +2,9 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed
+  @version "v1"
+  @source "trento/wanda"
+  @contract_name "ExecutionCompleted"
   @moduledoc false
   @primary_key false
   @required_fields [:execution_id, :group_id, :result, :check_results]

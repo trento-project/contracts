@@ -2,6 +2,9 @@ defmodule Trento.Events.Checks.V1.Web.ExecutionRequested do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed
+  @version "v1"
+  @source "trento/web"
+  @contract_name "ExecutionRequested"
   @moduledoc false
   @primary_key false
   @required_fields [:execution_id, :group_id, :targets]

@@ -12,12 +12,20 @@ defmodule Mix.Tasks.Contracts.Generate do
       required = get_required(json_schema)
       module_name = path |> Path.basename(".schema.json") |> get_module_name()
 
+      %{"version" => version, "source" => source, "contract_name" => contract_name} =
+        path |> Path.basename(".schema.json") |> get_contract_info
+
       file_content =
         quote do
           defmodule unquote(Module.concat([module_name])) do
             use Ecto.Schema
             import Ecto.Changeset
             import PolymorphicEmbed
+
+            @version unquote(version)
+            @source unquote(source)
+            @contract_name unquote(contract_name)
+
             @moduledoc false
             @primary_key false
             @required_fields unquote(required)
@@ -348,6 +356,14 @@ defmodule Mix.Tasks.Contracts.Generate do
       |> Enum.map_join(".", &Macro.camelize/1)
 
     "Trento.Events.#{Macro.camelize(module_name)}"
+  end
+
+  def get_contract_info(contract_name) do
+    [_, _project, version, source, contract_name | _] =
+      contract_name
+      |> String.split(".")
+
+    %{"version" => version, "source" => "trento/" <> source, "contract_name" => contract_name}
   end
 
   def get_guard("string"), do: "Kernel.is_bitstring"
