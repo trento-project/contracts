@@ -12,7 +12,7 @@ defmodule Mix.Tasks.Contracts.Generate do
       required = get_required(json_schema)
       module_name = path |> Path.basename(".schema.json") |> get_module_name()
 
-      %{"version" => version, "source" => source, "contract_name" => contract_name} =
+      %{"version" => version, "source" => source, "type" => event_type} =
         path |> Path.basename(".schema.json") |> get_contract_info
 
       file_content =
@@ -22,9 +22,11 @@ defmodule Mix.Tasks.Contracts.Generate do
             import Ecto.Changeset
             import PolymorphicEmbed
 
+            alias Cloudevents.Format.V_1_0.Event, as: CloudEvent
+
             @version unquote(version)
             @source unquote(source)
-            @contract_name unquote(contract_name)
+            @event_type unquote(event_type)
 
             @moduledoc false
             @primary_key false
@@ -35,6 +37,7 @@ defmodule Mix.Tasks.Contracts.Generate do
               unquote(Enum.map(json_schema["properties"], &get_field/1))
             end
 
+            unquote(trento_cloudevent_conversion_functions())
             unquote(trento_contract_functions())
           end
         end
@@ -358,12 +361,12 @@ defmodule Mix.Tasks.Contracts.Generate do
     "Trento.Events.#{Macro.camelize(module_name)}"
   end
 
-  def get_contract_info(contract_name) do
-    [_, _project, version, source, contract_name | _] =
-      contract_name
+  def get_contract_info(contract_path) do
+    [_, _project, version, source | _] =
+      contract_path
       |> String.split(".")
 
-    %{"version" => version, "source" => "trento/" <> source, "contract_name" => contract_name}
+    %{"version" => version, "source" => "trento/" <> source, "type" => contract_path}
   end
 
   def get_guard("string"), do: "Kernel.is_bitstring"
@@ -373,6 +376,29 @@ defmodule Mix.Tasks.Contracts.Generate do
   def only_primitives?(types) do
     types_list = types |> Enum.map(fn %{"type" => type} -> type end)
     "object" not in types_list
+  end
+
+  @doc """
+    Generates the cloud events conversion functions for the contract
+  """
+  def trento_cloudevent_conversion_functions() do
+    quote do
+      def serialize_to_cloud_event(contract) do
+        case CloudEvent.from_map(%{
+               "specversion" => "1.0",
+               "id" => "id",
+               "type" => @event_type,
+               "source" => @source,
+               "data" => contract
+             }) do
+          {:ok, event} ->
+            Cloudevents.to_json(event)
+
+          error ->
+            error
+        end
+      end
+    end
   end
 
   def trento_contract_functions() do

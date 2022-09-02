@@ -2,9 +2,10 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed
+  alias Cloudevents.Format.V_1_0.Event, as: CloudEvent
   @version "v1"
   @source "trento/wanda"
-  @contract_name "ExecutionCompleted"
+  @event_type "trento.checks.v1.wanda.ExecutionCompleted"
   @moduledoc false
   @primary_key false
   @required_fields [:execution_id, :group_id, :result, :check_results]
@@ -762,6 +763,19 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
       field(:group_id, :string),
       field(:result, :string)
     ]
+  end
+
+  def serialize_to_cloud_event(contract) do
+    case CloudEvent.from_map(%{
+           "specversion" => "1.0",
+           "id" => "id",
+           "type" => @event_type,
+           "source" => @source,
+           "data" => contract
+         }) do
+      {:ok, event} -> Cloudevents.to_json(event)
+      error -> error
+    end
   end
 
   (

@@ -2,9 +2,10 @@ defmodule Trento.Events.Checks.V1.Agent.FactsGathered do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed
+  alias Cloudevents.Format.V_1_0.Event, as: CloudEvent
   @version "v1"
   @source "trento/agent"
-  @contract_name "FactsGathered"
+  @event_type "trento.checks.v1.agent.FactsGathered"
   @moduledoc false
   @primary_key false
   @required_fields [:execution_id, :agent_id, :facts_gathered]
@@ -325,6 +326,19 @@ defmodule Trento.Events.Checks.V1.Agent.FactsGathered do
         )
       end
     ]
+  end
+
+  def serialize_to_cloud_event(contract) do
+    case CloudEvent.from_map(%{
+           "specversion" => "1.0",
+           "id" => "id",
+           "type" => @event_type,
+           "source" => @source,
+           "data" => contract
+         }) do
+      {:ok, event} -> Cloudevents.to_json(event)
+      error -> error
+    end
   end
 
   (
