@@ -295,15 +295,16 @@ defmodule Trento.Events.Checks.V1.Wanda.FactsGatheringRequested do
 
     @doc "  Serialize and return a cloud event json from a contract struct\n"
     def serialize_to_cloud_event(contract) do
-      case CloudEvent.from_map(%{
-             "specversion" => "1.0",
-             "id" => UUID.uuid4(),
-             "type" => @event_type,
-             "source" => @source,
-             "data" => contract
-           }) do
-        {:ok, event} -> Cloudevents.to_json(event)
-        error -> error
+      with :ok <- validate_with_schema(contract),
+           {:ok, event} <-
+             CloudEvent.from_map(%{
+               "specversion" => "1.0",
+               "id" => UUID.uuid4(),
+               "type" => @event_type,
+               "source" => @source,
+               "data" => contract
+             }) do
+        event
       end
     end
 
