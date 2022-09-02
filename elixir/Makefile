@@ -1,7 +1,7 @@
 .PHONY: all clean elixir-generate
 SCHEMAS = ../schema
 
-all: elixir-generate
+all: elixir-generate make-schemas
 
 elixir-generate: $(SCHEMAS)/*.json
 	mix deps.get
