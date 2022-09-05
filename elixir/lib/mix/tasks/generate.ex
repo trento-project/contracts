@@ -387,6 +387,7 @@ defmodule Mix.Tasks.Contracts.Generate do
       @doc """
         Serialize and return a module struct from a cloud event json
       """
+      @spec serialize_from_cloud_event(json :: binary()) :: {:ok, __MODULE__} | {:error, any}
       def serialize_from_cloud_event(json_cloud_event) do
         with {:ok, event} <- Cloudevents.from_json(json_cloud_event) do
           create_contract_from_cloud_event(event)
@@ -396,6 +397,7 @@ defmodule Mix.Tasks.Contracts.Generate do
       @doc """
         Serialize and return a cloud event json from a contract struct
       """
+      @spec serialize_to_cloud_event(contract :: __MODULE__) :: {:ok, binary()} | {:error, any}
       def serialize_to_cloud_event(contract) do
         with :ok <- validate_with_schema(contract),
              {:ok, event} <-
