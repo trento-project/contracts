@@ -2,6 +2,11 @@ defmodule Trento.Events.Checks.V1.Agent.FactsGathered do
   use Ecto.Schema
   import Ecto.Changeset
   import PolymorphicEmbed
+  alias Trento.Events.JsonSchema
+  alias Cloudevents.Format.V_1_0.Event, as: CloudEvent
+  @version "v1"
+  @source "trento/agent"
+  @event_type "trento.checks.v1.agent.FactsGathered"
   @moduledoc false
   @primary_key false
   @required_fields [:execution_id, :agent_id, :facts_gathered]
@@ -323,6 +328,46 @@ defmodule Trento.Events.Checks.V1.Agent.FactsGathered do
       end
     ]
   end
+
+  (
+    @doc "  Serialize and return a module struct from a cloud event json\n"
+    @spec serialize_from_cloud_event(json :: binary()) :: {:ok, __MODULE__} | {:error, any}
+    def serialize_from_cloud_event(json_cloud_event) do
+      with {:ok, event} <- Cloudevents.from_json(json_cloud_event) do
+        create_contract_from_cloud_event(event)
+      end
+    end
+
+    @doc "  Serialize and return a cloud event json from a contract struct\n"
+    @spec serialize_to_cloud_event(contract :: __MODULE__) :: {:ok, binary()} | {:error, any}
+    def serialize_to_cloud_event(contract) do
+      with :ok <- validate_with_schema(contract),
+           {:ok, event} <-
+             CloudEvent.from_map(%{
+               "specversion" => "1.0",
+               "id" => UUID.uuid4(),
+               "type" => @event_type,
+               "source" => @source,
+               "data" => contract
+             }) do
+        event
+      end
+    end
+
+    defp validate_with_schema(data) do
+      JsonSchema.validate(@event_type, data)
+    end
+
+    defp create_contract_from_cloud_event(%CloudEvent{data: data, type: @event_type}) do
+      with :ok <- validate_with_schema(data) do
+        __MODULE__.new(data)
+      end
+    end
+
+    defp create_contract_from_cloud_event(%CloudEvent{type: event_type}) do
+      {:error, "invalid event type, provided #{event_type}"}
+    end
+  )
 
   (
     @doc "Returns an ok tuple if the params are valid, otherwise returns `{:error, errors}`.\nAccepts a map or a list of maps.\n"

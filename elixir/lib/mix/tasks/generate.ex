@@ -2,7 +2,7 @@ defmodule Mix.Tasks.Contracts.Generate do
   use Mix.Task
 
   def run(_) do
-    schemas_paths = Path.wildcard("../schema/*.schema.json")
+    schemas_paths = Path.wildcard("./priv/schemas/*.schema.json")
 
     schemas_paths
     |> Enum.map(fn path -> {path, File.read!(path)} end)
@@ -12,12 +12,23 @@ defmodule Mix.Tasks.Contracts.Generate do
       required = get_required(json_schema)
       module_name = path |> Path.basename(".schema.json") |> get_module_name()
 
+      %{"version" => version, "source" => source, "type" => event_type} =
+        path |> Path.basename(".schema.json") |> get_contract_info
+
       file_content =
         quote do
           defmodule unquote(Module.concat([module_name])) do
             use Ecto.Schema
             import Ecto.Changeset
             import PolymorphicEmbed
+
+            alias Trento.Events.JsonSchema
+            alias Cloudevents.Format.V_1_0.Event, as: CloudEvent
+
+            @version unquote(version)
+            @source unquote(source)
+            @event_type unquote(event_type)
+
             @moduledoc false
             @primary_key false
             @required_fields unquote(required)
@@ -27,6 +38,7 @@ defmodule Mix.Tasks.Contracts.Generate do
               unquote(Enum.map(json_schema["properties"], &get_field/1))
             end
 
+            unquote(trento_cloudevent_conversion_functions())
             unquote(trento_contract_functions())
           end
         end
@@ -350,6 +362,14 @@ defmodule Mix.Tasks.Contracts.Generate do
     "Trento.Events.#{Macro.camelize(module_name)}"
   end
 
+  def get_contract_info(contract_path) do
+    [_, _project, version, source | _] =
+      contract_path
+      |> String.split(".")
+
+    %{"version" => version, "source" => "trento/" <> source, "type" => contract_path}
+  end
+
   def get_guard("string"), do: "Kernel.is_bitstring"
   def get_guard("number"), do: "Kernel.is_number"
   def get_guard("boolean"), do: "Kernel.is_boolean"
@@ -357,6 +377,55 @@ defmodule Mix.Tasks.Contracts.Generate do
   def only_primitives?(types) do
     types_list = types |> Enum.map(fn %{"type" => type} -> type end)
     "object" not in types_list
+  end
+
+  @doc """
+    Generates the cloud events conversion functions for the contract
+  """
+  def trento_cloudevent_conversion_functions() do
+    quote do
+      @doc """
+        Serialize and return a module struct from a cloud event json
+      """
+      @spec serialize_from_cloud_event(json :: binary()) :: {:ok, __MODULE__} | {:error, any}
+      def serialize_from_cloud_event(json_cloud_event) do
+        with {:ok, event} <- Cloudevents.from_json(json_cloud_event) do
+          create_contract_from_cloud_event(event)
+        end
+      end
+
+      @doc """
+        Serialize and return a cloud event json from a contract struct
+      """
+      @spec serialize_to_cloud_event(contract :: __MODULE__) :: {:ok, binary()} | {:error, any}
+      def serialize_to_cloud_event(contract) do
+        with :ok <- validate_with_schema(contract),
+             {:ok, event} <-
+               CloudEvent.from_map(%{
+                 "specversion" => "1.0",
+                 "id" => UUID.uuid4(),
+                 "type" => @event_type,
+                 "source" => @source,
+                 "data" => contract
+               }) do
+          event
+        end
+      end
+
+      defp validate_with_schema(data) do
+        JsonSchema.validate(@event_type, data)
+      end
+
+      defp create_contract_from_cloud_event(%CloudEvent{data: data, type: @event_type}) do
+        with :ok <- validate_with_schema(data) do
+          __MODULE__.new(data)
+        end
+      end
+
+      defp create_contract_from_cloud_event(%CloudEvent{type: event_type}) do
+        {:error, "invalid event type, provided #{event_type}"}
+      end
+    end
   end
 
   def trento_contract_functions() do
