@@ -30,7 +30,7 @@ defmodule TrentoContracts.MixProject do
       {:typed_struct, "~> 0.3", override: true},
       {:proper_case, "~> 1.3"},
       {:polymorphic_embed, "~> 3.0"},
-      {:cloudevents, "~> 0.4.0"}
+      {:cloudevents, "~> 0.6.1"}
     ]
   end
 end
