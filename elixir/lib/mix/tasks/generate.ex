@@ -327,6 +327,14 @@ defmodule Mix.Tasks.Contracts.Generate do
     end
   end
 
+  def get_field({k, %{"type" => "string", "enum" => enum_values}}) when is_list(enum_values) do
+    quote do
+      field(unquote(String.to_atom(k)), unquote(Module.concat(["Ecto.Enum"])),
+        values: unquote(Enum.map(enum_values, &String.to_atom/1))
+      )
+    end
+  end
+
   def get_field({k, %{"type" => "string"}}) do
     quote do
       field(unquote(String.to_atom(k)), :string)
