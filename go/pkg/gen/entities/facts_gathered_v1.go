@@ -36,7 +36,7 @@ type FactsGatheredV1 struct {
   FactsGathered []*FactsGatheredItems `json:"facts_gathered"`
 }
 
-func NewFactsGatheredV1FromJson(rawJson []byte) (*FactsGatheredV1, error) {
+func serializeFactsGatheredV1FromJson(rawJson []byte) (*FactsGatheredV1, error) {
 	var event FactsGatheredV1
 	err := json.Unmarshal(rawJson, &event)
 	if err != nil {
@@ -81,7 +81,7 @@ func (e *FactsGatheredV1) Type() string {
 }
 
 
-func (e *FactsGatheredV1) SerializeCloudEvent() ([]byte, error) {
+func (e *FactsGatheredV1) Json() ([]byte, error) {
 	err := e.Valid()
 	if err != nil {
 		return nil, errors.Wrap(err, "the entity is invalid")
@@ -110,7 +110,7 @@ func (e *FactsGatheredV1) SerializeCloudEvent() ([]byte, error) {
 	return evt, nil
 }
 
-func NewFactsGatheredV1FromJsonCloudEvent(rawJson []byte) (*FactsGatheredV1, error) {
+func NewFactsGatheredV1FromJson(rawJson []byte) (*FactsGatheredV1, error) {
 	var decoded FactsGatheredV1
 
 	event := cloudevents.NewEvent()

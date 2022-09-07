@@ -28,7 +28,7 @@ type Target struct {
   Checks []string `json:"checks"`
 }
 
-func NewExecutionRequestedV1FromJson(rawJson []byte) (*ExecutionRequestedV1, error) {
+func serializeExecutionRequestedV1FromJson(rawJson []byte) (*ExecutionRequestedV1, error) {
 	var event ExecutionRequestedV1
 	err := json.Unmarshal(rawJson, &event)
 	if err != nil {
@@ -73,7 +73,7 @@ func (e *ExecutionRequestedV1) Type() string {
 }
 
 
-func (e *ExecutionRequestedV1) SerializeCloudEvent() ([]byte, error) {
+func (e *ExecutionRequestedV1) Json() ([]byte, error) {
 	err := e.Valid()
 	if err != nil {
 		return nil, errors.Wrap(err, "the entity is invalid")
@@ -102,7 +102,7 @@ func (e *ExecutionRequestedV1) SerializeCloudEvent() ([]byte, error) {
 	return evt, nil
 }
 
-func NewExecutionRequestedV1FromJsonCloudEvent(rawJson []byte) (*ExecutionRequestedV1, error) {
+func NewExecutionRequestedV1FromJson(rawJson []byte) (*ExecutionRequestedV1, error) {
 	var decoded ExecutionRequestedV1
 
 	event := cloudevents.NewEvent()

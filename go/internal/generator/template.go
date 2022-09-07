@@ -28,7 +28,7 @@ type GenerationTemplateInput struct {
 }
 
 const entityGenerationTemplate = `
-func New{{ .EntityName }}FromJson(rawJson []byte) (*{{ .EntityName }}, error) {
+func serialize{{ .EntityName }}FromJson(rawJson []byte) (*{{ .EntityName }}, error) {
 	var event {{ .EntityName }}
 	err := json.Unmarshal(rawJson, &event)
 	if err != nil {
@@ -73,7 +73,7 @@ func (e *{{ .EntityName }}) Type() string {
 }
 
 
-func (e *{{ .EntityName }}) SerializeCloudEvent() ([]byte, error) {
+func (e *{{ .EntityName }}) Json() ([]byte, error) {
 	err := e.Valid()
 	if err != nil {
 		return nil, errors.Wrap(err, "the entity is invalid")
@@ -102,7 +102,7 @@ func (e *{{ .EntityName }}) SerializeCloudEvent() ([]byte, error) {
 	return evt, nil
 }
 
-func New{{ .EntityName }}FromJsonCloudEvent(rawJson []byte) (*{{ .EntityName }}, error) {
+func New{{ .EntityName }}FromJson(rawJson []byte) (*{{ .EntityName }}, error) {
 	var decoded {{ .EntityName }}
 
 	event := cloudevents.NewEvent()

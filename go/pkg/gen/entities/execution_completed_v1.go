@@ -45,7 +45,7 @@ type ExpectationResult struct {
   Type string `json:"type"`
 }
 
-func NewExecutionCompletedV1FromJson(rawJson []byte) (*ExecutionCompletedV1, error) {
+func serializeExecutionCompletedV1FromJson(rawJson []byte) (*ExecutionCompletedV1, error) {
 	var event ExecutionCompletedV1
 	err := json.Unmarshal(rawJson, &event)
 	if err != nil {
@@ -90,7 +90,7 @@ func (e *ExecutionCompletedV1) Type() string {
 }
 
 
-func (e *ExecutionCompletedV1) SerializeCloudEvent() ([]byte, error) {
+func (e *ExecutionCompletedV1) Json() ([]byte, error) {
 	err := e.Valid()
 	if err != nil {
 		return nil, errors.Wrap(err, "the entity is invalid")
@@ -119,7 +119,7 @@ func (e *ExecutionCompletedV1) SerializeCloudEvent() ([]byte, error) {
 	return evt, nil
 }
 
-func NewExecutionCompletedV1FromJsonCloudEvent(rawJson []byte) (*ExecutionCompletedV1, error) {
+func NewExecutionCompletedV1FromJson(rawJson []byte) (*ExecutionCompletedV1, error) {
 	var decoded ExecutionCompletedV1
 
 	event := cloudevents.NewEvent()
