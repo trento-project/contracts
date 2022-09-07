@@ -88,7 +88,7 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
 
                           field(:return_value, ReturnValue)
                         ),
-                        field(:type, :string)
+                        field(:type, Ecto.Enum, values: [:expect, :expect_same])
                       ]
                     end
 
@@ -228,7 +228,13 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
                     @moduledoc false
                     @required_fields [:name, :message, :type]
                     embedded_schema do
-                      [field(:message, :string), field(:name, :string), field(:type, :string)]
+                      [
+                        field(:message, :string),
+                        field(:name, :string),
+                        field(:type, Ecto.Enum,
+                          values: [:fact_missing_error, :illegal_expression_error]
+                        )
+                      ]
                     end
 
                     (
@@ -510,7 +516,12 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
             @derive Jason.Encoder
             @required_fields [:name, :result, :type]
             import PolymorphicEmbed
-            [field(:name, :string), field(:result, :boolean), field(:type, :string)]
+
+            [
+              field(:name, :string),
+              field(:result, :boolean),
+              field(:type, Ecto.Enum, values: [:expect, :expect_same])
+            ]
 
             (
               @doc "Returns an ok tuple if the params are valid, otherwise returns `{:error, errors}`.\nAccepts a map or a list of maps.\n"
@@ -637,7 +648,7 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
               defoverridable changeset: 2
             )
           end,
-          field(:result, :string)
+          field(:result, Ecto.Enum, values: [:passing, :warning, :critical])
         ]
 
         (
@@ -762,7 +773,7 @@ defmodule Trento.Events.Checks.V1.Wanda.ExecutionCompleted do
       end,
       field(:execution_id, :string),
       field(:group_id, :string),
-      field(:result, :string)
+      field(:result, Ecto.Enum, values: [:passing, :warning, :critical])
     ]
   end
 
