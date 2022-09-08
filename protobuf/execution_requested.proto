@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package trento.checks.v1;
+option go_package = "/;events";
+
+message Target {
+    string agent_id = 1;
+    repeated string checks = 2;
+}
+
+message ExecutionRequested {
+    string execution_id = 1;
+    string group_id = 2;
+    repeated Target targets = 3;
+}
