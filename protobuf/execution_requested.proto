@@ -2,12 +2,7 @@ syntax = "proto3";
 
 package trento.checks.v1;
 
-import "priv/proto/cloudevent.proto";
-
 message fg {
   string execution_id =1;
   string group_id = 2;
 }
-
-
-
