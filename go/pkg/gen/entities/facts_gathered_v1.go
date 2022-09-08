@@ -15,8 +15,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Error 
-type Error struct {
+// FactGatheredError 
+type FactGatheredError struct {
   Message string `json:"message"`
   Type string `json:"type"`
 }
@@ -24,7 +24,6 @@ type Error struct {
 // FactsGatheredItems 
 type FactsGatheredItems struct {
   CheckId string `json:"check_id"`
-  Error *Error `json:"error,omitempty"`
   Name string `json:"name"`
   Value interface{} `json:"value"`
 }
