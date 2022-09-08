@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package trento.checks.v1;
+option go_package = "/;events";
+
+message FactError {
+  string message = 1;
+  string type = 2;
+}
+
+message Fact {
+  string check_id = 1;
+  string name = 2;
+  oneof value {
+    string text_value = 3;
+
+    float numeric_value = 4;
+
+    FactError error_value = 5;
+  }
+}
+
+message FactsGathered {
+  string execution_id =1;
+  string agent_id = 2;
+
+  repeated Fact facts_gathered = 3;
+}
