@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package trento.checks.v1;
+option go_package = "/;events";
+
+import "google/protobuf/any.proto";
+
+enum ExpectationType {
+    EXPECT = 0;
+    EXPECT_SAME = 1;
+}
+
+enum ExpectationError {
+    FACT_MISSING_ERROR = 0;
+
+    ILLEGAL_EXPRESSION_ERROR = 1;
+}
+
+enum Result {
+    PASSING = 0;
+    WARNING = 1;
+    CRITICAL = 2;
+}
+
+message ExpectationEvaluationError {
+    string name = 1;
+
+    string message  = 2;
+
+    ExpectationError type = 3;
+}
+
+message ExpectationEvaluation {
+    string name = 1;
+    oneof return_value {
+        float numeric_value = 2;
+
+        bool boolean_value = 3;
+
+        string string_value = 4;
+    }
+
+    ExpectationType type = 5;
+}
+
+// Wrapper type, needed because we cannot use oneof with repeated fields
+// https://github.com/protocolbuffers/protobuf/issues/2592
+message ExpectationEvaluations {
+    oneof evaluations {
+        ExpectationEvaluation evaluation_value = 1;
+
+        ExpectationEvaluationError evaluation_error = 2;
+    }
+
+}
+message AgentCheckResult {
+    string agent_id = 1;
+
+    repeated ExpectationEvaluations evaluations = 2;
+    // TODO: better type?
+    map<string, google.protobuf.Any> facts = 3;
+}
+
+message ExpectationResult {
+    string name = 1;
+    bool result = 2;
+    ExpectationType type = 3;
+}
+
+message CheckResult {
+    string check_id = 1;
+    repeated AgentCheckResult agents_check_results = 2;
+    repeated ExpectationResult expectation_results = 3;
+    Result result = 4;
+}
+
+message ExecutionCompleted {
+    string execution_id = 1;
+    string group_id = 2;
+    Result result = 3;
+    repeated CheckResult check_results = 4;
+}
