@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package trento.checks.v1;
+option go_package = "/;events";
 
 message fg {
   string execution_id =1;
