@@ -5,14 +5,14 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-func ToEvent(event proto.Message, source string) ([]byte, error) {
+func ToEvent(event proto.Message, source string, id string) ([]byte, error) {
 	data, err := anypb.New(event)
 	if err != nil {
 		return nil, err
 	}
 
 	ce := CloudEvent{
-		Id:          "id",
+		Id:          id,
 		Source:      source,
 		SpecVersion: "1.0",
 		Type:        eventTypeFromProto(event),

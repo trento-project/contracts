@@ -44,7 +44,7 @@ func TestToEvent(t *testing.T) {
 
 	rawCe, err := proto.Marshal(&ce)
 	assert.NoError(t, err)
-	encodedEvent, err := events.ToEvent(&event, "wandalorian")
+	encodedEvent, err := events.ToEvent(&event, "wandalorian", "id")
 	assert.NoError(t, err)
 
 	assert.EqualValues(t, rawCe, encodedEvent)
