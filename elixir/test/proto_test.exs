@@ -1,7 +1,7 @@
 defmodule ProtoTest do
   use ExUnit.Case
 
-  alias Cloudevents.CloudEvent
+  alias CloudEvents.CloudEvent
 
   test "should decode to the right struct" do
     %Test.Event{id: event_id} = event = Test.Event.new(id: UUID.uuid4())

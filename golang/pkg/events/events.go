@@ -60,6 +60,6 @@ func EventType(src []byte) (string, error) {
 		return "", nil
 	}
 
-	name := any.ProtoReflect().Type().Descriptor().Name()
+	name := any.ProtoReflect().Type().Descriptor().FullName()
 	return string(name), nil
 }

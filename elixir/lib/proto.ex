@@ -11,7 +11,7 @@ defmodule Proto do
     data = Protobuf.Encoder.encode(struct)
 
     cloud_event =
-      Cloudevents.CloudEvent.new!(
+      CloudEvents.CloudEvent.new!(
         data: {:proto_data, Google.Protobuf.Any.new!(value: data, type_url: get_type(mod))},
         spec_version: "1.0",
         type: get_type(mod),
@@ -19,14 +19,14 @@ defmodule Proto do
         source: source
       )
 
-    Cloudevents.CloudEvent.encode(cloud_event)
+    CloudEvents.CloudEvent.encode(cloud_event)
   end
 
   @doc """
   """
   def from_event(value) do
     %{type: type, data: {:proto_data, %Google.Protobuf.Any{value: data}}} =
-      Cloudevents.CloudEvent.decode(value)
+      CloudEvents.CloudEvent.decode(value)
 
     decode(type, data)
   end
@@ -36,9 +36,10 @@ defmodule Proto do
 
     try do
       module = Module.safe_concat([module_name])
-      module.decode(data)
+
+      {:ok, module.decode(data)}
     rescue
-      ArgumentError -> {:error, :not_found}
+      ArgumentError -> {:error, :event_not_found}
     end
   end
 

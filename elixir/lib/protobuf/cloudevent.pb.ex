@@ -1,12 +1,12 @@
-defmodule Cloudevents.CloudEvent.AttributesEntry do
+defmodule CloudEvents.CloudEvent.AttributesEntry do
   @moduledoc false
   use Protobuf, map: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
   field :key, 1, type: :string
-  field :value, 2, type: Cloudevents.CloudEventAttributeValue
+  field :value, 2, type: CloudEvents.CloudEventAttributeValue
 end
 
-defmodule Cloudevents.CloudEvent do
+defmodule CloudEvents.CloudEvent do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
@@ -16,13 +16,13 @@ defmodule Cloudevents.CloudEvent do
   field :source, 2, type: :string
   field :spec_version, 3, type: :string, json_name: "specVersion"
   field :type, 4, type: :string
-  field :attributes, 5, repeated: true, type: Cloudevents.CloudEvent.AttributesEntry, map: true
+  field :attributes, 5, repeated: true, type: CloudEvents.CloudEvent.AttributesEntry, map: true
   field :binary_data, 6, type: :bytes, json_name: "binaryData", oneof: 0
   field :text_data, 7, type: :string, json_name: "textData", oneof: 0
   field :proto_data, 8, type: Google.Protobuf.Any, json_name: "protoData", oneof: 0
 end
 
-defmodule Cloudevents.CloudEventAttributeValue do
+defmodule CloudEvents.CloudEventAttributeValue do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 

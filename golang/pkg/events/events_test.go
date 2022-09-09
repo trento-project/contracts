@@ -13,11 +13,10 @@ func TestToEvent(t *testing.T) {
 	event := events.FactsGatheringRequested{
 		ExecutionId: "exe",
 		GroupId:     "group_1",
-		Targets:     []string{"target1"},
-		Facts: []*events.AgentFact{
+		Targets: []*events.FactsGatheringRequestedTarget{
 			{
 				AgentId: "agent_1",
-				Facts: []*events.FactDefinition{
+				FactRequests: []*events.FactRequest{
 					{
 						CheckId:  "check_1",
 						Name:     "test fact",
@@ -54,11 +53,10 @@ func TestFromEvent(t *testing.T) {
 	event := events.FactsGatheringRequested{
 		ExecutionId: "exe",
 		GroupId:     "group_1",
-		Targets:     []string{"target1"},
-		Facts: []*events.AgentFact{
+		Targets: []*events.FactsGatheringRequestedTarget{
 			{
 				AgentId: "agent_1",
-				Facts: []*events.FactDefinition{
+				FactRequests: []*events.FactRequest{
 					{
 						CheckId:  "check_1",
 						Name:     "test fact",
@@ -95,6 +93,5 @@ func TestFromEvent(t *testing.T) {
 
 	assert.EqualValues(t, event.GetExecutionId(), decodedEvent.GetExecutionId())
 	assert.EqualValues(t, event.GetGroupId(), decodedEvent.GetGroupId())
-	assert.EqualValues(t, event.GetTargets(), decodedEvent.GetTargets())
-	assert.EqualValues(t, event.Facts[0].String(), event.Facts[0].String())
+	assert.EqualValues(t, event.Targets[0].String(), event.Targets[0].String())
 }

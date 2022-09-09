@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package cloudevents;
+package CloudEvents;
 
 option go_package = "/;events";
 
