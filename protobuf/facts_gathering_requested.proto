@@ -3,22 +3,20 @@ syntax = "proto3";
 package trento.checks.v1;
 option go_package = "/;events";
 
-message FactDefinition {
+message FactRequest {
     string check_id = 1;
     string name = 2;
     string gatherer = 3;
     string argument = 4;
 }
 
-
-message AgentFact {
+message FactsGatheringRequestedTarget {
     string agent_id = 1;
-    repeated FactDefinition facts = 2;
+    repeated FactRequest fact_requests = 2;
 }
 
 message FactsGatheringRequested {
     string execution_id = 1;
     string group_id = 2;
-    repeated string targets = 3;
-    repeated AgentFact facts = 4;
+    repeated FactsGatheringRequestedTarget targets = 3;
 }
