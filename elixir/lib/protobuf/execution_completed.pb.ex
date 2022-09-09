@@ -62,21 +62,13 @@ defmodule Trento.Checks.V1.ExpectationEvaluations do
     oneof: 0
 end
 
-defmodule Trento.Checks.V1.AgentCheckResult.FactsEntry do
-  @moduledoc false
-  use Protobuf, map: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
-
-  field :key, 1, type: :string
-  field :value, 2, type: Google.Protobuf.Any
-end
-
 defmodule Trento.Checks.V1.AgentCheckResult do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
   field :agent_id, 1, type: :string, json_name: "agentId"
   field :evaluations, 2, repeated: true, type: Trento.Checks.V1.ExpectationEvaluations
-  field :facts, 3, repeated: true, type: Trento.Checks.V1.AgentCheckResult.FactsEntry, map: true
+  field :facts, 3, repeated: true, type: Trento.Checks.V1.Fact
 end
 
 defmodule Trento.Checks.V1.ExpectationResult do

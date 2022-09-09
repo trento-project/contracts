@@ -7,7 +7,7 @@ all: go-generate elixir-generate
 go-generate: # Generate golang protobuf stubs
 	protoc --experimental_allow_proto3_optional \
 	--plugin $(GO_PATH)/bin/protoc-gen-go \
-	--proto_path=protobuf --go_out golang/pkg/events/ protobuf/*.proto
+	--go_out golang/pkg/events/ protobuf/*.proto
 
 elixir-generate: # Generate elixir protobuf stubs
 	protoc --elixir_out=./elixir/lib protobuf/*.proto

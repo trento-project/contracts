@@ -3,7 +3,7 @@ syntax = "proto3";
 package trento.checks.v1;
 option go_package = "/;events";
 
-import "google/protobuf/any.proto";
+import "protobuf/facts_gathered.proto";
 
 enum ExpectationType {
     EXPECT = 0;
@@ -12,7 +12,6 @@ enum ExpectationType {
 
 enum ExpectationError {
     FACT_MISSING_ERROR = 0;
-
     ILLEGAL_EXPRESSION_ERROR = 1;
 }
 
@@ -24,9 +23,7 @@ enum Result {
 
 message ExpectationEvaluationError {
     string name = 1;
-
     string message  = 2;
-
     ExpectationError type = 3;
 }
 
@@ -34,12 +31,9 @@ message ExpectationEvaluation {
     string name = 1;
     oneof return_value {
         float numeric_value = 2;
-
         bool boolean_value = 3;
-
         string string_value = 4;
     }
-
     ExpectationType type = 5;
 }
 
@@ -48,17 +42,14 @@ message ExpectationEvaluation {
 message ExpectationEvaluations {
     oneof evaluations {
         ExpectationEvaluation evaluation_value = 1;
-
         ExpectationEvaluationError evaluation_error = 2;
     }
 
 }
 message AgentCheckResult {
     string agent_id = 1;
-
     repeated ExpectationEvaluations evaluations = 2;
-    // TODO: better type?
-    map<string, google.protobuf.Any> facts = 3;
+    repeated Fact facts = 3;
 }
 
 message ExpectationResult {
