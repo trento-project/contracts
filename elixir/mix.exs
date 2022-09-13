@@ -3,7 +3,7 @@ defmodule Proto.MixProject do
 
   def project do
     [
-      app: :proto,
+      app: :trento_contracts,
       version: "0.1.0",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
@@ -36,7 +36,9 @@ defmodule Proto.MixProject do
       # Can be ignored if you don't use Google's protos.
       # Or you can generate the code by yoprself.
       {:google_protos, "~> 0.1"},
-      {:uuid, "~> 1.1"}
+      {:uuid, "~> 1.1"},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
   end
 end
