@@ -231,7 +231,6 @@ type ExpectationEvaluation struct {
 
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// Types that are assignable to ReturnValue:
-	//
 	//	*ExpectationEvaluation_NumericValue
 	//	*ExpectationEvaluation_BooleanValue
 	//	*ExpectationEvaluation_StringValue
@@ -343,7 +342,6 @@ type ExpectationEvaluations struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to Evaluations:
-	//
 	//	*ExpectationEvaluations_EvaluationValue
 	//	*ExpectationEvaluations_EvaluationError
 	Evaluations isExpectationEvaluations_Evaluations `protobuf_oneof:"evaluations"`
