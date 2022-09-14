@@ -52,12 +52,12 @@ func EventType(src []byte) (string, error) {
 	var decodedCe CloudEvent
 	err := proto.Unmarshal(src, &decodedCe)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	any, err := anypb.UnmarshalNew(decodedCe.GetProtoData(), proto.UnmarshalOptions{})
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	name := any.ProtoReflect().Type().Descriptor().FullName()
