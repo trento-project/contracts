@@ -5,6 +5,8 @@ defmodule Trento.Contracts do
 
   require Logger
 
+  @dialyzer {:nowarn_function, to_event: 1, to_event: 2}
+
   @doc """
   Encode and wrap an event struct to a protobuf CloudEvent.
   """
