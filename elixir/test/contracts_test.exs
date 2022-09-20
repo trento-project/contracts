@@ -28,6 +28,8 @@ defmodule Trento.ContractsTest do
   test "should encode to the right struct" do
     event = Test.Event.new(id: UUID.uuid4())
     cloudevent_id = UUID.uuid4()
+    time = DateTime.utc_now()
+    time_attr = Google.Protobuf.Timestamp.new!(seconds: time |> DateTime.to_unix())
 
     cloudevent = %CloudEvent{
       data:
@@ -40,12 +42,20 @@ defmodule Trento.ContractsTest do
       id: cloudevent_id,
       source: "wandalorian",
       spec_version: "1.0",
-      type: "Test.Event"
+      type: "Test.Event",
+      attributes: %{
+        "time" => CloudEvents.CloudEventAttributeValue.new!(attr: {:ce_timestamp, time_attr})
+      }
     }
 
     encoded_cloudevent = CloudEvent.encode(cloudevent)
 
-    assert encoded_cloudevent == Trento.Contracts.to_event(event, id: cloudevent_id, source: "wandalorian")
+    assert encoded_cloudevent ==
+             Trento.Contracts.to_event(event,
+               id: cloudevent_id,
+               source: "wandalorian",
+               time: time
+             )
   end
 
   test "should return error if the event is not wrapped in a CloudEvent" do
@@ -75,6 +85,7 @@ defmodule Trento.ContractsTest do
       type: "Unknown.Event"
     }
 
-    assert {:error, :unknown_event} = cloudevent |> CloudEvent.encode() |> Trento.Contracts.from_event()
+    assert {:error, :unknown_event} =
+             cloudevent |> CloudEvent.encode() |> Trento.Contracts.from_event()
   end
 end

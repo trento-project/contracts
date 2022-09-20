@@ -14,6 +14,15 @@ defmodule Trento.Contracts do
   def to_event(%mod{} = struct, opts \\ []) do
     id = Keyword.get(opts, :id, UUID.uuid4())
     source = Keyword.get(opts, :source, "trento")
+
+    time =
+      Keyword.get(
+        opts,
+        :time,
+        DateTime.utc_now()
+      )
+
+    time_attr = Google.Protobuf.Timestamp.new!(seconds: time |> DateTime.to_unix())
     data = Protobuf.Encoder.encode(struct)
 
     cloud_event =
@@ -22,6 +31,9 @@ defmodule Trento.Contracts do
         spec_version: "1.0",
         type: get_type(mod),
         id: id,
+        attributes: %{
+          "time" => CloudEvents.CloudEventAttributeValue.new!(attr: {:ce_timestamp, time_attr})
+        },
         source: source
       )
 
