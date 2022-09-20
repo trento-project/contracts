@@ -1,0 +1,238 @@
+name: Contracts CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  ELIXIR_VERSION: 1.13.1
+  OTP_VERSION: 24
+
+jobs:
+  elixir-deps:
+    name: Elixir dependencies
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+        env:
+          ImageOS: ubuntu20
+
+      - name: Retrieve Cached Dependencies
+        uses: actions/cache@v3
+        id: mix-cache
+        with:
+          path: |
+            elixir/deps
+            elixir/_build/test
+            elixir/priv/plts
+          key: ${{ runner.os }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
+
+      - name: Install Dependencies
+        if: steps.mix-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p priv/plts
+          mix local.rebar --force
+          mix local.hex --force
+          mix deps.get
+          mix deps.compile --warnings-as-errors
+          mix dialyzer --plt
+
+  static-code-analysis-elixir:
+    name: Static Code Analysis elixir
+    needs: [elixir-deps]
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+        env:
+          ImageOS: ubuntu20
+
+      - name: Retrieve Elixir Cached Dependencies
+        uses: actions/cache@v3
+        id: mix-cache
+        with:
+          path: |
+            elixir/deps
+            elixir/_build/test
+            elixir/priv/plts
+          key: ${{ runner.os }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
+
+      - name: Run Credo
+        run: cd elixir && mix credo
+
+      - name: Check elixir Code Format
+        working-directory: elixir
+        run: ls -la && mix format --check-formatted
+
+      - name: Run Dialyzer
+        run: cd elixir && mix dialyzer
+
+  check-elixir-contracts:
+    name: Check elixir contracts
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v3
+      - name: Setup
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+        env:
+          ImageOS: ubuntu20
+
+      - name: Retrieve Cached Dependencies
+        uses: actions/cache@v3
+        id: mix-cache
+        with:
+          path: |
+            elixir/deps
+            elixir/_build/test
+            elixir/priv/plts
+          key: ${{ runner.os }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
+
+      - uses: arduino/setup-protoc@v1
+        with:
+          version: "3.20.1"
+
+      - name: Install Dependencies
+        if: steps.mix-cache.outputs.cache-hit != 'true'
+        run: |
+          cd elixir
+          mkdir -p priv/plts
+          mix local.rebar --force
+          mix local.hex --force
+          mix deps.get
+          mix deps.compile --warnings-as-errors
+          mix dialyzer --plt
+
+      - name: Install protoc elixir plugin
+        run: mix escript.install --force hex protobuf
+      - name: Add escript bin folder to path
+        run: echo "$HOME/.mix/escripts" >> $GITHUB_PATH
+      - name: generate contracts
+        run: make elixir-generate
+      - name: Check for uncommited schema changes
+        run: |
+          git add -N elixir/
+          git diff
+          git diff --quiet
+      - name: Git status
+        run: git status
+
+  check-go-contracts:
+    name: Check go contracts
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - uses: arduino/setup-protoc@v1
+        with:
+          version: "3.20.1"
+      - name: Install protoc gen go
+        run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+      - name: generate contracts
+        run: make go-generate
+      - name: Check for uncommited schema changes
+        run: |
+          git add -N golang/
+          git diff
+          git diff --quiet
+      - name: Git status
+        run: git status
+
+  test-golang:
+    name: Go test
+    needs: [check-go-contracts]
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+
+      - name: Run golang tests
+        run: cd golang && go mod download && go test ./...
+
+  test-elixir:
+    name: Elixir test
+    needs: [elixir-deps, check-elixir-contracts]
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
+
+      - name: Retrieve Cached Dependencies
+        uses: actions/cache@v3
+        id: mix-cache
+        with:
+          path: |
+            elixir/deps
+            elixir/_build/test
+            elixir/priv/plts
+          key: ${{ runner.os }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
+
+      - name: Run elixir test
+        run: cd elixir && mix test --color --trace --slowest 10
