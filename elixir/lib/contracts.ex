@@ -8,6 +8,11 @@ defmodule Trento.Contracts do
   @dialyzer {:nowarn_function, to_event: 1, to_event: 2}
 
   @doc """
+  Return the content type of contracts
+  """
+  def content_type, do: "application/x-protobuf"
+
+  @doc """
   Encode and wrap an event struct to a protobuf CloudEvent.
   """
   @spec to_event(struct(), Keyword.t()) :: binary()

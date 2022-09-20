@@ -63,3 +63,8 @@ func EventType(src []byte) (string, error) {
 	name := any.ProtoReflect().Type().Descriptor().FullName()
 	return string(name), nil
 }
+
+// ContentType returns the content type of used contracts
+func ContentType() string {
+	return "application/x-protobuf"
+}
