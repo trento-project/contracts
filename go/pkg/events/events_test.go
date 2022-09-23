@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/trento-project/contracts/pkg/events"
+	"github.com/trento-project/contracts/go/pkg/events"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
