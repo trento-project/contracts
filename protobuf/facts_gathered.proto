@@ -3,6 +3,8 @@ syntax = "proto3";
 package Trento.Checks.V1;
 option go_package = "/;events";
 
+import "google/protobuf/struct.proto";
+
 message FactError {
   string message = 1;
   string type = 2;
@@ -11,17 +13,15 @@ message FactError {
 message Fact {
   string check_id = 1;
   string name = 2;
-  oneof value {
-    string text_value = 3;
+  oneof fact_value {
+    google.protobuf.Value value = 3;
 
-    float numeric_value = 4;
-
-    FactError error_value = 5;
+    FactError error_value = 4;
   }
 }
 
 message FactsGathered {
-  string execution_id =1;
+  string execution_id = 1;
   string agent_id = 2;
 
   repeated Fact facts_gathered = 3;

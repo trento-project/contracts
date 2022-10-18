@@ -10,13 +10,12 @@ defmodule Trento.Checks.V1.Fact do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  oneof :value, 0
+  oneof :fact_value, 0
 
   field :check_id, 1, type: :string, json_name: "checkId"
   field :name, 2, type: :string
-  field :text_value, 3, type: :string, json_name: "textValue", oneof: 0
-  field :numeric_value, 4, type: :float, json_name: "numericValue", oneof: 0
-  field :error_value, 5, type: Trento.Checks.V1.FactError, json_name: "errorValue", oneof: 0
+  field :value, 3, type: Google.Protobuf.Value, oneof: 0
+  field :error_value, 4, type: Trento.Checks.V1.FactError, json_name: "errorValue", oneof: 0
 end
 
 defmodule Trento.Checks.V1.FactsGathered do
