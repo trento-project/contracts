@@ -91,12 +91,17 @@ jobs:
         working-directory: elixir
         run: mix credo
 
+      - name: Check for unused dependencies
+        working-directory: elixir
+        run: mix deps.unlock --check-unused
+
       - name: Check elixir Code Format
         working-directory: elixir
         run: ls -la && mix format --check-formatted
 
       - name: Run Dialyzer
-        run: cd elixir && mix dialyzer
+        working-directory: elixir
+        run: mix dialyzer
 
   check-elixir-contracts:
     name: Check elixir contracts
