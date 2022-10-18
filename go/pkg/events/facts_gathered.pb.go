@@ -84,7 +84,6 @@ type Fact struct {
 	CheckId string `protobuf:"bytes,1,opt,name=check_id,json=checkId,proto3" json:"check_id,omitempty"`
 	Name    string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Types that are assignable to FactValue:
-	//
 	//	*Fact_Value
 	//	*Fact_ErrorValue
 	FactValue isFact_FactValue `protobuf_oneof:"fact_value"`

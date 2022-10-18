@@ -42,7 +42,6 @@ type CloudEvent struct {
 	// CloudEvent Data (Bytes, Text, or Proto)
 	//
 	// Types that are assignable to Data:
-	//
 	//	*CloudEvent_BinaryData
 	//	*CloudEvent_TextData
 	//	*CloudEvent_ProtoData
@@ -184,7 +183,6 @@ type CloudEventAttributeValue struct {
 	// The value can be any one of these types.
 	//
 	// Types that are assignable to Attr:
-	//
 	//	*CloudEventAttributeValue_CeBoolean
 	//	*CloudEventAttributeValue_CeInteger
 	//	*CloudEventAttributeValue_CeString
