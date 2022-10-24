@@ -22,7 +22,8 @@ message Fact {
 
 message FactsGathered {
   string execution_id = 1;
-  string agent_id = 2;
+  string group_id = 2;
+  string agent_id = 3;
 
-  repeated Fact facts_gathered = 3;
+  repeated Fact facts_gathered = 4;
 }
