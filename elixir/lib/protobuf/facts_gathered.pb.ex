@@ -23,9 +23,10 @@ defmodule Trento.Checks.V1.FactsGathered do
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
   field :execution_id, 1, type: :string, json_name: "executionId"
-  field :agent_id, 2, type: :string, json_name: "agentId"
+  field :group_id, 2, type: :string, json_name: "groupId"
+  field :agent_id, 3, type: :string, json_name: "agentId"
 
-  field :facts_gathered, 3,
+  field :facts_gathered, 4,
     repeated: true,
     type: Trento.Checks.V1.Fact,
     json_name: "factsGathered"
