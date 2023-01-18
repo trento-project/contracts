@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package trento.checks.v1;
+option go_package = "/;events";
+
+message Target {
+    string agent_id = 1;
+    repeated string checks = 2;
+}
