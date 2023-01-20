@@ -3,13 +3,10 @@ syntax = "proto3";
 package trento.checks.v1;
 option go_package = "/;events";
 
-import "google/protobuf/struct.proto";
 import "protobuf/target.proto";
 
-
-message ExecutionRequested {
+message ExecutionStarted {
     string execution_id = 1;
     string group_id = 2;
     repeated Target targets = 3;
-    map<string, google.protobuf.Value> env = 4;
 }
