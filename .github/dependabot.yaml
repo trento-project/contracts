@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "trento-project/maintainers"
+  - package-ecosystem: "mix"
+    directory: "/elixir"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "trento-project/maintainers"
+  - package-ecosystem: "gomod"
+    directory: "/go"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "trento-project/maintainers"
