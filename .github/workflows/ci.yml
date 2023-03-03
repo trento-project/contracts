@@ -247,7 +247,9 @@ jobs:
             elixir/_build/test
             elixir/priv/plts
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('elixir/mix.lock') }}
-
+      - name: Compile
+        working-directory: elixir
+        run: mix compile --warnings-as-errors
       - name: Run elixir test
         working-directory: elixir
-        run: mix test --color --trace --slowest 10
+        run: mix test --warnings-as-errors --color --trace --slowest 10
