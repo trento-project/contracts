@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package Trento.Checks.V1;
+option go_package = "/;events";
+
+enum ResourceType {
+    RESOURCE_TYPE_UNSPECIFIED = 0;
+    CLUSTER = 1;
+    HOST = 2;
+}
