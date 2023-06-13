@@ -16,9 +16,5 @@ defmodule Trento.Checks.V1.ExecutionCompleted do
   field :execution_id, 1, type: :string, json_name: "executionId"
   field :group_id, 2, type: :string, json_name: "groupId"
   field :result, 3, type: Trento.Checks.V1.Result, enum: true
-
-  field :resource_type, 4,
-    type: Trento.Checks.V1.ResourceType,
-    json_name: "resourceType",
-    enum: true
+  field :target_type, 4, type: Trento.Checks.V1.TargetType, json_name: "targetType", enum: true
 end
