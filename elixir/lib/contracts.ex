@@ -25,20 +25,19 @@ defmodule Trento.Contracts do
         DateTime.utc_now()
       )
 
-    time_attr = Google.Protobuf.Timestamp.new!(seconds: time |> DateTime.to_unix())
+    time_attr = %Google.Protobuf.Timestamp{seconds: time |> DateTime.to_unix()}
     data = Protobuf.Encoder.encode(struct)
 
-    cloud_event =
-      CloudEvents.CloudEvent.new(
-        data: {:proto_data, Google.Protobuf.Any.new!(value: data, type_url: get_type(mod))},
-        spec_version: "1.0",
-        type: get_type(mod),
-        id: id,
-        attributes: %{
-          "time" => CloudEvents.CloudEventAttributeValue.new!(attr: {:ce_timestamp, time_attr})
-        },
-        source: source
-      )
+    cloud_event = %CloudEvents.CloudEvent{
+      data: {:proto_data, %Google.Protobuf.Any{value: data, type_url: get_type(mod)}},
+      spec_version: "1.0",
+      type: get_type(mod),
+      id: id,
+      attributes: %{
+        "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}}
+      },
+      source: source
+    }
 
     CloudEvents.CloudEvent.encode(cloud_event)
   end
