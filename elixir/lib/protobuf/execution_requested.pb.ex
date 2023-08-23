@@ -16,4 +16,5 @@ defmodule Trento.Checks.V1.ExecutionRequested do
   field :group_id, 2, type: :string, json_name: "groupId"
   field :targets, 3, repeated: true, type: Trento.Checks.V1.Target
   field :env, 4, repeated: true, type: Trento.Checks.V1.ExecutionRequested.EnvEntry, map: true
+  field :target_type, 5, type: :string, json_name: "targetType"
 end

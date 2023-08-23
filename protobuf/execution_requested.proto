@@ -12,4 +12,5 @@ message ExecutionRequested {
     string group_id = 2;
     repeated Target targets = 3;
     map<string, google.protobuf.Value> env = 4;
+    string target_type = 5;
 }
