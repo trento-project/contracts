@@ -9,4 +9,5 @@ message ExecutionStarted {
     string execution_id = 1;
     string group_id = 2;
     repeated Target targets = 3;
+    string target_type = 4;
 }
