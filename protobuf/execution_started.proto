@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package trento.checks.v1;
+package Trento.Checks.V1;
 option go_package = "/;events";
 
 import "protobuf/target.proto";
