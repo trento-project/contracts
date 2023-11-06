@@ -63,13 +63,13 @@ fn get_type_from_proto_message(message: &impl protobuf::MessageFull) -> String {
     message.descriptor_dyn().full_name().to_owned()
 }
 
-pub fn event_type_from_raw_bytes(src: Vec<u8>) -> Result<String, protobuf::Error> {
-    let event = CloudEvent::parse_from_bytes(&src)?;
+pub fn event_type_from_raw_bytes(src: &Vec<u8>) -> Result<String, protobuf::Error> {
+    let event = CloudEvent::parse_from_bytes(src)?;
     Ok(event.type_)
 }
 
-pub fn event_data_from_event(src: Vec<u8>, dst: &mut impl protobuf::MessageFull) -> Result<(), protobuf::Error> {
-    let event = CloudEvent::parse_from_bytes(&src)?;
+pub fn event_data_from_event(src: &Vec<u8>, dst: &mut impl protobuf::MessageFull) -> Result<(), protobuf::Error> {
+    let event = CloudEvent::parse_from_bytes(src)?;
 
     let cloud_any = event.proto_data();
     dst.merge_from_bytes(&cloud_any.value)?;
@@ -155,7 +155,7 @@ mod tests {
 
         let event_bytes = event_builder.build(message).unwrap();
 
-        assert_eq!("Trento.Checks.V1.ExecutionStarted", event_type_from_raw_bytes(event_bytes).unwrap());
+        assert_eq!("Trento.Checks.V1.ExecutionStarted", event_type_from_raw_bytes(&event_bytes).unwrap());
     }
 
     #[test]
@@ -169,7 +169,7 @@ mod tests {
 
         let mut message_dst = ExecutionStarted::new();
 
-        event_data_from_event(event_bytes, &mut message_dst).unwrap();
+        event_data_from_event(&event_bytes, &mut message_dst).unwrap();
 
         assert_eq!(message_dst.execution_id, "execution_id");
         assert_eq!(message_dst.group_id, "group_id");
