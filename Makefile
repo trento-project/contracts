@@ -8,3 +8,6 @@ go-generate: # Generate golang protobuf stubs
 
 elixir-generate: # Generate elixir protobuf stubs
 	protoc --elixir_out=./elixir/lib protobuf/*.proto
+
+rust-generate: # Generate rust protobuf stubs
+	protoc --rust_out=./rust/trento-contracts/src/stubs protobuf/*.proto
