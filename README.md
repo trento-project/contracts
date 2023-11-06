@@ -14,6 +14,7 @@ asdf plugin add erlang
 asdf plugin add golang
 asdf plugin add protoc
 asdf plugin add protoc-gen-go
+asdf plugin add rust
 ```
 
 - Define `golang` version to `asdf` to enable `protoc-gen-go` usage. For that, edit `$HOME/.asdf/.tool-versions` and append the next line:
@@ -35,6 +36,13 @@ mix escript.install hex protobuf
 asdf reshim
 ```
 
+- Install and configure protoc-gen-rust running:
+
+```
+cargo install protobuf-codegen
+asdf reshim
+```
+
 ## Generate the code
 
 Once all the tools are installed, run the next command to update the final code interfaces:
@@ -43,4 +51,4 @@ Once all the tools are installed, run the next command to update the final code 
 make
 ```
 
-In order to make the last command work, `protoc-gen-go` and `protoc-gen-elixir` must be available in your PATH system variable (they are if they are installed using the previously explained `asdf` option).
+In order to make the last command work, `protoc-gen-go`, `protoc-gen-elixir` and `protoc-gen-rust` must be available in your PATH system variable (they are if they are installed using the previously explained `asdf` option).
