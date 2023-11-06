@@ -1,6 +1,6 @@
 .PHONY: all go-generate
 
-all: go-generate elixir-generate
+all: go-generate elixir-generate rust-generate
 
 go-generate: # Generate golang protobuf stubs
 	protoc --experimental_allow_proto3_optional \
