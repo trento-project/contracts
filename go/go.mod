@@ -3,7 +3,7 @@ module github.com/trento-project/contracts/go
 go 1.18
 
 require (
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/protobuf v1.31.0
 )
