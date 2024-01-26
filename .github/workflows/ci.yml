@@ -42,7 +42,7 @@ jobs:
           ImageOS: ubuntu20
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
@@ -87,7 +87,7 @@ jobs:
           ImageOS: ubuntu20
 
       - name: Retrieve Elixir Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
@@ -131,7 +131,7 @@ jobs:
           ImageOS: ubuntu20
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
@@ -239,7 +239,7 @@ jobs:
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
