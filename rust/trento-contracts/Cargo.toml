@@ -1,0 +1,21 @@
+[package]
+name = "trento-contracts"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.31"
+protobuf = "3.3.0"
+
+[dependencies.uuid]
+version = "1.5.0"
+features = [
+    "v4",                # Lets you generate random UUIDs
+    "fast-rng",          # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+]
+
+[dev-dependencies]
+protobuf-json-mapping = "3.3.0"
