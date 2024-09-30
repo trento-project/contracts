@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package Trento.Operations.V1;
+option go_package = "/;events";
+
+message OperationStarted {
+    string operation_id = 1;
+    repeated string agent_ids = 2;
+    string operation_type = 3;
+}

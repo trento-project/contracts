@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package Trento.Operations.V1;
+option go_package = "/;events";
+
+enum ErrorPhase {
+    PLAN = 0;
+    COMMIT = 1;
+    VERIFY = 2;
+    ROLLBACK = 3;
+}
+
+message OperationReportError {
+  string message = 1;
+  ErrorPhase error_phase = 2;
+}
+
+message OperationReportResponse {
+  map<string, string> diff = 1;
+}
+
+message OperationExecutionReport {
+  string operation_id = 1;
+  string agent_id = 2;
+
+  oneof operation_result {
+    OperationReportResponse response = 3;
+
+    OperationReportError error_value = 4;
+  }
+}

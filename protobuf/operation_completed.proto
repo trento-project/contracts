@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package Trento.Operations.V1;
+option go_package = "/;events";
+
+enum OperationResult {
+    COMPLETED = 0;
+    ROLLED_BACK = 1;
+    FAILED = 2;
+}
+
+message OperationCompleted {
+    string operation_id = 1;
+    OperationResult result = 2;
+    string operation_type = 3;
+}
