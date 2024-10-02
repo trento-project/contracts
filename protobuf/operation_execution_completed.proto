@@ -3,6 +3,8 @@ syntax = "proto3";
 package Trento.Operations.V1;
 option go_package = "/;events";
 
+import "protobuf/operation_completed.proto";
+
 enum ErrorPhase {
     PLAN = 0;
     COMMIT = 1;
@@ -16,16 +18,19 @@ message OperationReportError {
 }
 
 message OperationReportResponse {
-  map<string, string> diff = 1;
+  OperationResult result = 1;
+  map<string, string> diff = 2;
 }
 
 message OperationExecutionReport {
   string operation_id = 1;
-  string agent_id = 2;
+  string group_id = 2;
+  int32 step_number = 3;
+  string agent_id = 4;
 
   oneof operation_result {
-    OperationReportResponse response = 3;
+    OperationReportResponse response = 5;
 
-    OperationReportError error_value = 4;
+    OperationReportError error_value = 6;
   }
 }

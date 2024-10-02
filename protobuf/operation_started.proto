@@ -3,8 +3,11 @@ syntax = "proto3";
 package Trento.Operations.V1;
 option go_package = "/;events";
 
+import "protobuf/operation_target.proto";
+
 message OperationStarted {
     string operation_id = 1;
-    repeated string agent_ids = 2;
+    string group_id = 2;
     string operation_type = 3;
+    repeated OperationTarget targets = 4;
 }

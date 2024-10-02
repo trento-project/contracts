@@ -14,5 +14,7 @@ message OperationExecutionRequestedTarget {
 
 message OperationExecutionRequested {
     string operation_id = 1;
-    repeated OperationExecutionRequestedTarget targets = 2;
+    string group_id = 2;
+    int32 step_number = 3;
+    repeated OperationExecutionRequestedTarget targets = 4;
 }

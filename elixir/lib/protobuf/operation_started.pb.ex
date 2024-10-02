@@ -4,6 +4,7 @@ defmodule Trento.Operations.V1.OperationStarted do
   use Protobuf, protoc_gen_elixir_version: "0.13.0", syntax: :proto3
 
   field :operation_id, 1, type: :string, json_name: "operationId"
-  field :agent_ids, 2, repeated: true, type: :string, json_name: "agentIds"
+  field :group_id, 2, type: :string, json_name: "groupId"
   field :operation_type, 3, type: :string, json_name: "operationType"
+  field :targets, 4, repeated: true, type: Trento.Operations.V1.OperationTarget
 end

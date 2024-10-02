@@ -4,13 +4,15 @@ package Trento.Operations.V1;
 option go_package = "/;events";
 
 enum OperationResult {
-    COMPLETED = 0;
-    ROLLED_BACK = 1;
-    FAILED = 2;
+    UPDATED = 0;
+    NOT_UPDATED = 1;
+    ROLLED_BACK = 2;
+    FAILED = 3;
 }
 
 message OperationCompleted {
     string operation_id = 1;
-    OperationResult result = 2;
+    string group_id = 2;
     string operation_type = 3;
+    OperationResult result = 4;
 }

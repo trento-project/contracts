@@ -36,7 +36,9 @@ defmodule Trento.Operations.V1.OperationReportResponse do
 
   use Protobuf, protoc_gen_elixir_version: "0.13.0", syntax: :proto3
 
-  field :diff, 1,
+  field :result, 1, type: Trento.Operations.V1.OperationResult, enum: true
+
+  field :diff, 2,
     repeated: true,
     type: Trento.Operations.V1.OperationReportResponse.DiffEntry,
     map: true
@@ -50,10 +52,12 @@ defmodule Trento.Operations.V1.OperationExecutionReport do
   oneof :operation_result, 0
 
   field :operation_id, 1, type: :string, json_name: "operationId"
-  field :agent_id, 2, type: :string, json_name: "agentId"
-  field :response, 3, type: Trento.Operations.V1.OperationReportResponse, oneof: 0
+  field :group_id, 2, type: :string, json_name: "groupId"
+  field :step_number, 3, type: :int32, json_name: "stepNumber"
+  field :agent_id, 4, type: :string, json_name: "agentId"
+  field :response, 5, type: Trento.Operations.V1.OperationReportResponse, oneof: 0
 
-  field :error_value, 4,
+  field :error_value, 6,
     type: Trento.Operations.V1.OperationReportError,
     json_name: "errorValue",
     oneof: 0

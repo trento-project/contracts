@@ -3,9 +3,10 @@ defmodule Trento.Operations.V1.OperationResult do
 
   use Protobuf, enum: true, protoc_gen_elixir_version: "0.13.0", syntax: :proto3
 
-  field :COMPLETED, 0
-  field :ROLLED_BACK, 1
-  field :FAILED, 2
+  field :UPDATED, 0
+  field :NOT_UPDATED, 1
+  field :ROLLED_BACK, 2
+  field :FAILED, 3
 end
 
 defmodule Trento.Operations.V1.OperationCompleted do
@@ -14,6 +15,7 @@ defmodule Trento.Operations.V1.OperationCompleted do
   use Protobuf, protoc_gen_elixir_version: "0.13.0", syntax: :proto3
 
   field :operation_id, 1, type: :string, json_name: "operationId"
-  field :result, 2, type: Trento.Operations.V1.OperationResult, enum: true
+  field :group_id, 2, type: :string, json_name: "groupId"
   field :operation_type, 3, type: :string, json_name: "operationType"
+  field :result, 4, type: Trento.Operations.V1.OperationResult, enum: true
 end
