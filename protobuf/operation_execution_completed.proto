@@ -3,34 +3,32 @@ syntax = "proto3";
 package Trento.Operations.V1;
 option go_package = "/;events";
 
-import "protobuf/operation_completed.proto";
-
-enum ErrorPhase {
+enum OperationPhase {
     PLAN = 0;
     COMMIT = 1;
     VERIFY = 2;
     ROLLBACK = 3;
 }
 
-message OperationReportError {
-  string message = 1;
-  ErrorPhase error_phase = 2;
-}
-
-message OperationReportResponse {
-  OperationResult result = 1;
+message OperationResponse {
+  OperationPhase phase = 1;
   map<string, string> diff = 2;
 }
 
-message OperationExecutionReport {
+message OperationError {
+  OperationPhase error_phase = 1;
+  string message = 2;
+}
+
+message OperationExecutionCompleted {
   string operation_id = 1;
   string group_id = 2;
   int32 step_number = 3;
   string agent_id = 4;
 
   oneof operation_result {
-    OperationReportResponse response = 5;
+    OperationResponse response = 5;
 
-    OperationReportError error_value = 6;
+    OperationError error_value = 6;
   }
 }
