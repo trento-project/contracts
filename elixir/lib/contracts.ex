@@ -17,6 +17,7 @@ defmodule Trento.Contracts do
   def to_event(%mod{} = struct, opts \\ []) do
     id = Keyword.get(opts, :id, UUID.uuid4())
     source = Keyword.get(opts, :source, "trento")
+    private_key = Keyword.get(opts, :private_key, "")
 
     time =
       Keyword.get(
@@ -34,10 +35,10 @@ defmodule Trento.Contracts do
       type: get_type(mod),
       id: id,
       attributes: %{
-        "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}}
+        "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}},
       },
       source: source
-    }
+    } |> add_signature(private_key)
 
     CloudEvents.CloudEvent.encode(cloud_event)
   end
@@ -85,4 +86,53 @@ defmodule Trento.Contracts do
     |> Atom.to_string()
     |> String.replace("Elixir.", "")
   end
+
+  defp add_signature(event, ""), do: event
+
+  defp add_signature(
+    %CloudEvents.CloudEvent{
+      data: {:proto_data, %Google.Protobuf.Any{value: data}},
+      attributes: %{
+        "time" => %CloudEvents.CloudEventAttributeValue{
+          attr: {:ce_timestamp, %{seconds: time}}
+        }
+      } = current_attrs
+    } = event, private_key) do
+
+    time_str = Integer.to_string(time)
+    signature = :public_key.sign(data <> time_str, :sha256, private_key)
+
+    %CloudEvents.CloudEvent{
+      event |
+      attributes: Map.put(
+        current_attrs,
+        "signature",
+        %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, signature}}
+      )
+    }
+  end
+
+  # def add_signature(event, private_key) do
+  #   decoded_event = %{
+  #     data: {:proto_data, %Google.Protobuf.Any{value: data}},
+  #     attributes: %{
+  #       "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time}}
+  #     } = current_attrs
+  #   } = CloudEvents.CloudEvent.decode(event)
+
+  #   %{seconds: seconds} = time
+  #   time_str = Integer.to_string(seconds)
+  #   signature = :public_key.sign(data <> time_str, :sha256, private_key)
+
+  #   updated_event = %CloudEvents.CloudEvent{
+  #     decoded_event |
+  #     attributes: Map.put(
+  #       current_attrs,
+  #       "signature",
+  #       %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, signature}}
+  #     )
+  #   }
+
+  #   CloudEvents.CloudEvent.encode(updated_event)
+  # end
 end
