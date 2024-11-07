@@ -1,6 +1,10 @@
 package events
 
 import (
+	"crypto"
+	"crypto/rsa"
+	"crypto/sha256"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -110,6 +114,39 @@ func EventType(src []byte) (string, error) {
 
 	name := any.ProtoReflect().Type().Descriptor().FullName()
 	return string(name), nil
+}
+
+func VerifySignature(src []byte, publicKey any) error {
+	var decodedCe CloudEvent
+	err := proto.Unmarshal(src, &decodedCe)
+	if err != nil {
+		return err
+	}
+
+	signatureAttr, found := decodedCe.GetAttributes()["signature"]
+	if !found {
+		return fmt.Errorf("signature not found")
+	}
+
+	signature := signatureAttr.GetCeBytes()
+
+	timeAttr, found := decodedCe.GetAttributes()["time"]
+	if !found {
+		return fmt.Errorf("time not found")
+	}
+
+	time := fmt.Sprint(timeAttr.GetCeTimestamp().GetSeconds())
+	data := decodedCe.GetProtoData().GetValue()
+
+	hash := sha256.New()
+	_, err = hash.Write(append(data, time...))
+	if err != nil {
+		return err
+	}
+
+	hashedEvent := hash.Sum(nil)
+
+	return rsa.VerifyPKCS1v15(publicKey.(*rsa.PublicKey), crypto.SHA256, hashedEvent, signature)
 }
 
 // ContentType returns the content type of used contracts

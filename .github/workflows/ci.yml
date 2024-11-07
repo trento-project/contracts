@@ -6,10 +6,8 @@ on:
   pull_request:
 
 env:
-  ELIXIR_VERSION: 1.14.3
-  OTP_VERSION: 25
-  ELIXIR_VERSION_OBS: 1.13.4
-  OTP_VERSION_OBS: 22
+  ELIXIR_VERSION: 1.15.7
+  OTP_VERSION: 26
 
 jobs:
   elixir-deps:
@@ -18,6 +16,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - elixir: 1.15.7
+            otp: 26
           - elixir: 1.14.3
             otp: 25
           - elixir: 1.13.4
