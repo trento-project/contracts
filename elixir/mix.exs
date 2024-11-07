@@ -5,7 +5,7 @@ defmodule Proto.MixProject do
     [
       app: :trento_contracts,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps()
