@@ -1,7 +1,7 @@
 defmodule Trento.Operations.V1.OperationPhase do
   @moduledoc false
 
-  use Protobuf, enum: true, protoc_gen_elixir_version: "0.13.0", syntax: :proto3
+  use Protobuf, enum: true, syntax: :proto3, protoc_gen_elixir_version: "0.13.0"
 
   field :PLAN, 0
   field :COMMIT, 1
@@ -12,7 +12,7 @@ end
 defmodule Trento.Operations.V1.OperationResponse.DiffEntry do
   @moduledoc false
 
-  use Protobuf, map: true, protoc_gen_elixir_version: "0.13.0", syntax: :proto3
+  use Protobuf, map: true, syntax: :proto3, protoc_gen_elixir_version: "0.13.0"
 
   field :key, 1, type: :string
   field :value, 2, type: :string
@@ -21,7 +21,7 @@ end
 defmodule Trento.Operations.V1.OperationResponse do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.13.0", syntax: :proto3
+  use Protobuf, syntax: :proto3, protoc_gen_elixir_version: "0.13.0"
 
   field :phase, 1, type: Trento.Operations.V1.OperationPhase, enum: true
 
@@ -34,7 +34,7 @@ end
 defmodule Trento.Operations.V1.OperationError do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.13.0", syntax: :proto3
+  use Protobuf, syntax: :proto3, protoc_gen_elixir_version: "0.13.0"
 
   field :error_phase, 1,
     type: Trento.Operations.V1.OperationPhase,
@@ -47,7 +47,7 @@ end
 defmodule Trento.Operations.V1.OperationExecutionCompleted do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.13.0", syntax: :proto3
+  use Protobuf, syntax: :proto3, protoc_gen_elixir_version: "0.13.0"
 
   oneof :operation_result, 0
 
