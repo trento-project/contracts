@@ -21,7 +21,7 @@ defmodule Trento.ContractsTest do
       expire_at = DateTime.add(time, 60)
       expire_at_ts = DateTime.to_unix(expire_at)
 
-      message_content = Test.Event.encode(event)
+      message_content = %{}
       canonical_message_content = Protobuf.JSON.encode!(event)
 
       jwk = JOSE.JWK.from_pem(private_key)
@@ -71,7 +71,7 @@ defmodule Trento.ContractsTest do
       expire_at = DateTime.add(time, 20)
       expire_at_ts = DateTime.to_unix(expire_at)
 
-      message_content = Test.Event.encode(event)
+      message_content = %{}
       canonical_message_content = Protobuf.JSON.encode!(event)
 
       jwk = JOSE.JWK.from_pem(private_key)
@@ -199,7 +199,7 @@ defmodule Trento.ContractsTest do
       expire_at = DateTime.add(time, -60)
       expire_at_ts = DateTime.to_unix(expire_at)
 
-      message_content = Test.Event.encode(event)
+      message_content = %{}
       canonical_message_content = Protobuf.JSON.encode!(event)
 
       jwk = JOSE.JWK.from_pem(private_key)
@@ -243,7 +243,7 @@ defmodule Trento.ContractsTest do
       public_key: public_key
     } do
       event_id = UUID.uuid4()
-      event = %Test.Event{id: event_id}
+      _event = %Test.Event{id: event_id}
 
       time = DateTime.utc_now()
       time_ts = DateTime.to_unix(time)
@@ -251,7 +251,7 @@ defmodule Trento.ContractsTest do
       expire_at = DateTime.add(time, 60)
       expire_at_ts = DateTime.to_unix(expire_at)
 
-      message_content = Test.Event.encode(event)
+      message_content = %{}
 
       compacted_signature =
         "invalidsignature"

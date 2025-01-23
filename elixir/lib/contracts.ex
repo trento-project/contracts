@@ -30,14 +30,16 @@ defmodule Trento.Contracts do
   @spec to_signed_event(struct(), binary(), Keyword.t()) :: binary()
   def to_signed_event(struct, pem_private_key, opts \\ []) do
     jwk = JOSE.JWK.from_pem(pem_private_key)
+    updated_opts = [{:will_be_signed?, true} | opts]
 
-    canonical_plain_text = Protobuf.JSON.encode!(struct)
+    {:ok, json_encodable_map} = Protobuf.JSON.to_encodable(struct, emit_unpopulated: false)
+    canonical_plain_text = Jcs.encode(json_encodable_map)
     jws = %{"alg" => "RS512"}
     signature = JOSE.JWS.sign(jwk, canonical_plain_text, jws)
     {_alg, compacted_signature} = JOSE.JWS.compact(signature)
 
     struct
-    |> build_cloud_event(opts)
+    |> build_cloud_event(updated_opts)
     |> add_signature(compacted_signature)
     |> CloudEvents.CloudEvent.encode()
   end
@@ -71,13 +73,9 @@ defmodule Trento.Contracts do
   def from_signed_event(value, public_key) do
     with {:ok, event_type, event_data} <- decode_cloud_event(value),
          {:ok, canonical_plain_text} <- verify_event_signature(event_data, public_key),
-         {:ok, event_data} <- verify_event_validity(event_data),
-         {:ok, event_from_jws} <- decode_json_trento_event(event_type, canonical_plain_text),
-         {:ok, event_from_ce} <- decode_trento_event(event_type, event_data) do
-      case Map.equal?(event_from_jws, event_from_ce) do
-        true -> {:ok, event_from_jws}
-        false -> {:error, :decoding_error}
-      end
+         {:ok, _event_data} <- verify_event_validity(event_data),
+         {:ok, event_from_jws} <- decode_json_trento_event(event_type, canonical_plain_text) do
+      {:ok, event_from_jws}
     end
   end
 
@@ -85,6 +83,7 @@ defmodule Trento.Contracts do
     id = Keyword.get(opts, :id, UUID.uuid4())
     source = Keyword.get(opts, :source, "trento")
     validity_in_seconds = Keyword.get(opts, :validity_in_seconds, @default_event_validity)
+    will_be_signed? = Keyword.get(opts, :will_be_signed?, false)
 
     time =
       Keyword.get(
@@ -98,7 +97,14 @@ defmodule Trento.Contracts do
     time_attr = %Google.Protobuf.Timestamp{seconds: time |> DateTime.to_unix()}
     expire_at_attr = %Google.Protobuf.Timestamp{seconds: expiration |> DateTime.to_unix()}
 
-    data = Protobuf.Encoder.encode(struct)
+    data =
+      case will_be_signed? do
+        true ->
+          %{}
+
+        false ->
+          Protobuf.Encoder.encode(struct)
+      end
 
     %CloudEvents.CloudEvent{
       data: {:proto_data, %Google.Protobuf.Any{value: data, type_url: get_type(mod)}},

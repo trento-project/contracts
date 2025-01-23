@@ -7,6 +7,7 @@
   "file_system": {:hex, :file_system, "1.0.0", "b689cc7dcee665f774de94b5a832e578bd7963c8e637ef940cd44327db7de2cd", [:mix], [], "hexpm", "6752092d66aec5a10e662aefeed8ddb9531d79db0bc145bb8c40325ca1d8536d"},
   "google_protos": {:hex, :google_protos, "0.4.0", "93e1be2c1a07517ffed761f69047776caf35e4acd385aac4f5ce4fedd07f3660", [:mix], [{:protobuf, "~> 0.10", [hex: :protobuf, repo: "hexpm", optional: false]}], "hexpm", "4c54983d78761a3643e2198adf0f5d40a5a8b08162f3fc91c50faa257f3fa19f"},
   "jason": {:hex, :jason, "1.4.1", "af1504e35f629ddcdd6addb3513c3853991f694921b1b9368b0bd32beb9f1b63", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "fbb01ecdfd565b56261302f7e1fcc27c4fb8f32d56eab74db621fc154604a7a1"},
+  "jcs": {:hex, :jcs, "0.1.1", "369e5a8a1697dd0856eb5c214dfae97d2b9c5d848dba9f6982d98b0ff8baa9f3", [:mix], [{:jason, "~> 1.4", [hex: :jason, repo: "hexpm", optional: false]}], "hexpm", "b451f24d7220db89b3e6c0bd8271f32bb37bf5354eb36961bb24402a6dcf58ef"},
   "jose": {:hex, :jose, "1.11.10", "a903f5227417bd2a08c8a00a0cbcc458118be84480955e8d251297a425723f83", [:mix, :rebar3], [], "hexpm", "0d6cd36ff8ba174db29148fc112b5842186b68a90ce9fc2b3ec3afe76593e614"},
   "protobuf": {:hex, :protobuf, "0.12.0", "58c0dfea5f929b96b5aa54ec02b7130688f09d2de5ddc521d696eec2a015b223", [:mix], [{:jason, "~> 1.2", [hex: :jason, repo: "hexpm", optional: true]}], "hexpm", "75fa6cbf262062073dd51be44dd0ab940500e18386a6c4e87d5819a58964dc45"},
 }
