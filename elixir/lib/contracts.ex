@@ -29,9 +29,16 @@ defmodule Trento.Contracts do
   """
   @spec to_signed_event(struct(), binary(), Keyword.t()) :: binary()
   def to_signed_event(struct, pem_private_key, opts \\ []) do
+    jwk = JOSE.JWK.from_pem(pem_private_key)
+
+    canonical_plain_text = Protobuf.JSON.encode!(struct)
+    jws = %{"alg" => "RS512"}
+    signature = JOSE.JWS.sign(jwk, canonical_plain_text, jws)
+    {_alg, compacted_signature} = JOSE.JWS.compact(signature)
+
     struct
     |> build_cloud_event(opts)
-    |> add_signature(pem_private_key)
+    |> add_signature(compacted_signature)
     |> CloudEvents.CloudEvent.encode()
   end
 
@@ -63,9 +70,14 @@ defmodule Trento.Contracts do
           | {:error, :invalid_event_signature}
   def from_signed_event(value, public_key) do
     with {:ok, event_type, event_data} <- decode_cloud_event(value),
-         {:ok, event_data} <- verify_event_signature(event_data, public_key),
-         {:ok, event_data} <- verify_event_validity(event_data) do
-      decode_trento_event(event_type, event_data)
+         {:ok, canonical_plain_text} <- verify_event_signature(event_data, public_key),
+         {:ok, event_data} <- verify_event_validity(event_data),
+         {:ok, event_from_jws} <- decode_json_trento_event(event_type, canonical_plain_text),
+         {:ok, event_from_ce} <- decode_trento_event(event_type, event_data) do
+      case Map.equal?(event_from_jws, event_from_ce) do
+        true -> {:ok, event_from_jws}
+        false -> {:error, :decoding_error}
+      end
     end
   end
 
@@ -105,35 +117,26 @@ defmodule Trento.Contracts do
 
   defp add_signature(
          %CloudEvents.CloudEvent{
-           data: {:proto_data, %Google.Protobuf.Any{value: data}},
+           data: {:proto_data, %Google.Protobuf.Any{value: _data}},
            attributes:
              %{
                "time" => %CloudEvents.CloudEventAttributeValue{
-                 attr: {:ce_timestamp, %{seconds: time}}
+                 attr: {:ce_timestamp, %{seconds: _time}}
                },
                "expire_at" => %CloudEvents.CloudEventAttributeValue{
-                 attr: {:ce_timestamp, %{seconds: expire_at}}
+                 attr: {:ce_timestamp, %{seconds: _expire_at}}
                }
              } = current_attrs
          } = event,
-         private_key_content
+         compacted_signature
        ) do
-    signing_key =
-      private_key_content
-      |> :public_key.pem_decode()
-      |> Enum.at(0)
-      |> :public_key.pem_entry_decode()
-
-    time_str = Integer.to_string(time)
-    signature = :public_key.sign("#{data}#{time_str}#{expire_at}", :sha256, signing_key)
-
     %CloudEvents.CloudEvent{
       event
       | attributes:
           Map.put(
             current_attrs,
             "signature",
-            %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, signature}}
+            %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, compacted_signature}}
           )
     }
   end
@@ -159,32 +162,24 @@ defmodule Trento.Contracts do
 
   defp verify_event_signature(
          %CloudEvents.CloudEvent{
-           data: {:proto_data, %Google.Protobuf.Any{value: data}},
+           data: {:proto_data, %Google.Protobuf.Any{value: _data}},
            attributes: %{
              "time" => %CloudEvents.CloudEventAttributeValue{
-               attr: {:ce_timestamp, %{seconds: time}}
+               attr: {:ce_timestamp, %{seconds: _time}}
              },
              "expire_at" => %CloudEvents.CloudEventAttributeValue{
-               attr: {:ce_timestamp, %{seconds: expire_at}}
+               attr: {:ce_timestamp, %{seconds: _expire_at}}
              },
              "signature" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, signature}}
            }
-         } = event,
+         } = _event,
          public_key
        ) do
-    signing_key =
-      public_key
-      |> :public_key.pem_decode()
-      |> Enum.at(0)
-      |> :public_key.pem_entry_decode()
+    jwk = JOSE.JWK.from_pem(public_key)
 
-    event_signature_valid? =
-      :public_key.verify("#{data}#{time}#{expire_at}", :sha256, signature, signing_key)
-
-    if event_signature_valid? do
-      {:ok, event}
-    else
-      {:error, :invalid_event_signature}
+    case JOSE.JWS.verify(jwk, {%{}, signature}) do
+      {true, canonical_plain_text, _jws} -> {:ok, canonical_plain_text}
+      _err -> {:error, :invalid_event_signature}
     end
   end
 
@@ -210,6 +205,19 @@ defmodule Trento.Contracts do
   end
 
   defp verify_event_validity(_), do: {:error, :event_expired}
+
+  defp decode_json_trento_event(type, binary_data)
+       when is_binary(binary_data) do
+    try do
+      module_name = Macro.camelize(type)
+      module = Module.safe_concat([module_name])
+
+      {:ok, Protobuf.JSON.decode!(binary_data, module)}
+    rescue
+      ArgumentError ->
+        {:error, :unknown_event}
+    end
+  end
 
   defp decode_trento_event(type, %CloudEvents.CloudEvent{
          data: {:proto_data, %Google.Protobuf.Any{value: data}}

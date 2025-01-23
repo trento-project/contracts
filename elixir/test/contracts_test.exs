@@ -22,15 +22,13 @@ defmodule Trento.ContractsTest do
       expire_at_ts = DateTime.to_unix(expire_at)
 
       message_content = Test.Event.encode(event)
+      canonical_message_content = Protobuf.JSON.encode!(event)
 
-      signing_key =
-        private_key
-        |> :public_key.pem_decode()
-        |> Enum.at(0)
-        |> :public_key.pem_entry_decode()
+      jwk = JOSE.JWK.from_pem(private_key)
 
-      signature =
-        :public_key.sign("#{message_content}#{time_ts}#{expire_at_ts}", :sha256, signing_key)
+      jws = %{"alg" => "RS512"}
+      signature = JOSE.JWS.sign(jwk, canonical_message_content, jws)
+      {_alg, compacted_signature} = JOSE.JWS.compact(signature)
 
       cloudevent = %CloudEvent{
         data:
@@ -47,7 +45,9 @@ defmodule Trento.ContractsTest do
           "time" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: time_ts}}
           },
-          "signature" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, signature}}
+          "signature" => %CloudEvents.CloudEventAttributeValue{
+            attr: {:ce_bytes, compacted_signature}
+          }
         },
         id: UUID.uuid4(),
         source: "wandalorian",
@@ -61,7 +61,7 @@ defmodule Trento.ContractsTest do
                Trento.Contracts.from_signed_event(encoded_cloudevent, public_key)
     end
 
-    test "should encode to the right struct", %{private_key: private_key} do
+    test "should encode to the right struct", %{private_key: private_key, public_key: public_key} do
       event_id = UUID.uuid4()
       event = %Test.Event{id: event_id}
 
@@ -72,15 +72,13 @@ defmodule Trento.ContractsTest do
       expire_at_ts = DateTime.to_unix(expire_at)
 
       message_content = Test.Event.encode(event)
+      canonical_message_content = Protobuf.JSON.encode!(event)
 
-      signing_key =
-        private_key
-        |> :public_key.pem_decode()
-        |> Enum.at(0)
-        |> :public_key.pem_entry_decode()
+      jwk = JOSE.JWK.from_pem(private_key)
 
-      signature =
-        :public_key.sign("#{message_content}#{time_ts}#{expire_at_ts}", :sha256, signing_key)
+      jws = %{"alg" => "RS512"}
+      signature = JOSE.JWS.sign(jwk, canonical_message_content, jws)
+      {_alg, compacted_signature} = JOSE.JWS.compact(signature)
 
       cloudevent = %CloudEvent{
         data:
@@ -97,7 +95,9 @@ defmodule Trento.ContractsTest do
           "time" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: time_ts}}
           },
-          "signature" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, signature}}
+          "signature" => %CloudEvents.CloudEventAttributeValue{
+            attr: {:ce_bytes, compacted_signature}
+          }
         },
         id: event_id,
         source: "wandalorian",
@@ -107,14 +107,19 @@ defmodule Trento.ContractsTest do
 
       encoded_cloudevent = CloudEvent.encode(cloudevent)
 
-      assert encoded_cloudevent ==
-               Trento.Contracts.to_signed_event(
-                 event,
-                 private_key,
-                 id: event_id,
-                 source: "wandalorian",
-                 time: time
-               )
+      signed_event =
+        Trento.Contracts.to_signed_event(
+          event,
+          private_key,
+          id: event_id,
+          source: "wandalorian",
+          time: time
+        )
+
+      {:ok, verified_event} = Trento.Contracts.from_signed_event(signed_event, public_key)
+
+      assert verified_event == event
+      assert encoded_cloudevent == signed_event
     end
 
     test "should return error if the event is not wrapped in a CloudEvent", %{
@@ -144,15 +149,11 @@ defmodule Trento.ContractsTest do
       expire_at_ts = DateTime.to_unix(expire_at)
 
       message_content = <<0, 0, 0, 0, 0, 0, 0, 0>>
+      jwk = JOSE.JWK.from_pem(private_key)
 
-      signing_key =
-        private_key
-        |> :public_key.pem_decode()
-        |> Enum.at(0)
-        |> :public_key.pem_entry_decode()
-
-      signature =
-        :public_key.sign("#{message_content}#{time_ts}#{expire_at_ts}", :sha256, signing_key)
+      jws = %{"alg" => "RS512"}
+      signature = JOSE.JWS.sign(jwk, message_content, jws)
+      {_alg, compacted_signature} = JOSE.JWS.compact(signature)
 
       cloudevent = %CloudEvent{
         data:
@@ -169,7 +170,9 @@ defmodule Trento.ContractsTest do
           "time" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: time_ts}}
           },
-          "signature" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, signature}}
+          "signature" => %CloudEvents.CloudEventAttributeValue{
+            attr: {:ce_bytes, compacted_signature}
+          }
         },
         id: UUID.uuid4(),
         source: "wandalorian",
@@ -197,15 +200,13 @@ defmodule Trento.ContractsTest do
       expire_at_ts = DateTime.to_unix(expire_at)
 
       message_content = Test.Event.encode(event)
+      canonical_message_content = Protobuf.JSON.encode!(event)
 
-      signing_key =
-        private_key
-        |> :public_key.pem_decode()
-        |> Enum.at(0)
-        |> :public_key.pem_entry_decode()
+      jwk = JOSE.JWK.from_pem(private_key)
 
-      signature =
-        :public_key.sign("#{message_content}#{time_ts}#{expire_at_ts}", :sha256, signing_key)
+      jws = %{"alg" => "RS512"}
+      signature = JOSE.JWS.sign(jwk, canonical_message_content, jws)
+      {_alg, compacted_signature} = JOSE.JWS.compact(signature)
 
       cloudevent = %CloudEvent{
         data:
@@ -222,7 +223,9 @@ defmodule Trento.ContractsTest do
           "time" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: time_ts}}
           },
-          "signature" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, signature}}
+          "signature" => %CloudEvents.CloudEventAttributeValue{
+            attr: {:ce_bytes, compacted_signature}
+          }
         },
         id: UUID.uuid4(),
         source: "wandalorian",
@@ -245,11 +248,13 @@ defmodule Trento.ContractsTest do
       time = DateTime.utc_now()
       time_ts = DateTime.to_unix(time)
 
-      expire_at = DateTime.add(time, -60)
+      expire_at = DateTime.add(time, 60)
       expire_at_ts = DateTime.to_unix(expire_at)
 
       message_content = Test.Event.encode(event)
-      signature = "invalidsignature"
+
+      compacted_signature =
+        "invalidsignature"
 
       cloudevent = %CloudEvent{
         data:
@@ -266,7 +271,9 @@ defmodule Trento.ContractsTest do
           "time" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: time_ts}}
           },
-          "signature" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, signature}}
+          "signature" => %CloudEvents.CloudEventAttributeValue{
+            attr: {:ce_bytes, compacted_signature}
+          }
         },
         id: UUID.uuid4(),
         source: "wandalorian",
