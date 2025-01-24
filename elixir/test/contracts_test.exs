@@ -168,50 +168,56 @@ defmodule Trento.ContractsTest do
 
     test "should return error if the event is expired", %{
       public_key: public_key,
-      payload_with_signature: payload_with_signature,
-      message_content: message_content
+      private_key: private_key,
+      message_content: message_content,
+      time: time,
+      time_ts: time_ts,
+      event: event
     } do
-      time = DateTime.utc_now()
-      time_ts = DateTime.to_unix(time)
       wire_time_ts = DateTime.to_iso8601(time)
-      expire_at = DateTime.add(time, -60, :minute)
+      expire_at = DateTime.add(time, -60)
       expire_at_ts = DateTime.to_unix(expire_at)
       wire_expire_at_ts = DateTime.to_iso8601(expire_at)
-      payload_with_signature_decoded = Jason.decode!(payload_with_signature)
+      {:ok, json_encodable_map} = Protobuf.JSON.to_encodable(event)
 
-      updated_payload_with_sig =
-        %{
-          payload_with_signature_decoded
-          | "time" => wire_time_ts,
-            "expire_at" => wire_expire_at_ts
-        }
+      ts = %{"time" => wire_time_ts, "expire_at" => wire_expire_at_ts}
+      json_encodable_map_with_ts = Map.merge(json_encodable_map, ts)
+      canonical_message_content = Jcs.encode(json_encodable_map_with_ts)
+
+      jwk = JOSE.JWK.from_pem(private_key)
+
+      jws = %{"alg" => "RS512"}
+      signature = JOSE.JWS.sign(jwk, canonical_message_content, jws)
+      {_alg, compacted_signature} = JOSE.JWS.compact(signature)
+
+      payload_with_signature =
+        Map.merge(json_encodable_map_with_ts, %{"signature" => compacted_signature})
         |> Jason.encode!()
 
-      cloudevent =
-        %CloudEvent{
-          data:
-            {:proto_data,
-             %Google.Protobuf.Any{
-               __unknown_fields__: [],
-               type_url: "test.Event",
-               value: message_content
-             }},
-          attributes: %{
-            "expire_at" => %CloudEvents.CloudEventAttributeValue{
-              attr: {:ce_timestamp, %{seconds: expire_at_ts}}
-            },
-            "time" => %CloudEvents.CloudEventAttributeValue{
-              attr: {:ce_timestamp, %{seconds: time_ts}}
-            },
-            "signature" => %CloudEvents.CloudEventAttributeValue{
-              attr: {:ce_bytes, updated_payload_with_sig}
-            }
+      cloudevent = %CloudEvent{
+        data:
+          {:proto_data,
+           %Google.Protobuf.Any{
+             __unknown_fields__: [],
+             type_url: "Test.Event",
+             value: message_content
+           }},
+        attributes: %{
+          "expire_at" => %CloudEvents.CloudEventAttributeValue{
+            attr: {:ce_timestamp, %{seconds: expire_at_ts}}
           },
-          id: UUID.uuid4(),
-          source: "wandalorian",
-          spec_version: "1.0",
-          type: "test.Event"
-        }
+          "time" => %CloudEvents.CloudEventAttributeValue{
+            attr: {:ce_timestamp, %{seconds: time_ts}}
+          },
+          "signature" => %CloudEvents.CloudEventAttributeValue{
+            attr: {:ce_bytes, payload_with_signature}
+          }
+        },
+        id: UUID.uuid4(),
+        source: "wandalorian",
+        spec_version: "1.0",
+        type: "Test.Event"
+      }
 
       encoded_cloudevent = CloudEvent.encode(cloudevent)
 
