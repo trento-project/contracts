@@ -67,13 +67,11 @@ defmodule Trento.Contracts do
     with {:ok, event_type, event_data} <- decode_cloud_event(value),
          {:ok, canonical_plain_text} <- verify_event_signature(event_data, public_key),
          {:ok, event_with_ts} <- Jason.decode(canonical_plain_text),
-         {:ok, valid_event} <- verify_signed_event_validity(event_with_ts),
-         {:ok, event_decoded} <-
-           decode_json_trento_event(
-             event_type,
-             Map.drop(valid_event, ["signature", "expire_at", "time"])
-           ) do
-      {:ok, event_decoded}
+         {:ok, valid_event} <- verify_signed_event_validity(event_with_ts) do
+      decode_json_trento_event(
+        event_type,
+        Map.drop(valid_event, ["signature", "expire_at", "time"])
+      )
     end
   end
 
