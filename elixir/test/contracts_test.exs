@@ -94,7 +94,6 @@ defmodule Trento.ContractsTest do
       private_key: private_key,
       public_key: public_key
     } do
-      _encoded_cloudevent = CloudEvent.encode(cloudevent)
 
       signed_event =
         Trento.Contracts.to_signed_event(
@@ -109,7 +108,6 @@ defmodule Trento.ContractsTest do
         Trento.Contracts.from_signed_event(signed_event, public_key)
 
       assert verified_event == event
-      # assert encoded_cloudevent == signed_event
     end
 
     test "should return error if the event is not wrapped in a CloudEvent", %{
