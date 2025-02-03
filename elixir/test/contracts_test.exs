@@ -36,22 +36,13 @@ defmodule Trento.ContractsTest do
       |> Jason.encode!()
 
     cloudevent = %CloudEvent{
-      data:
-        {:proto_data,
-         %Google.Protobuf.Any{
-           __unknown_fields__: [],
-           type_url: "Test.Event",
-           value: message_content
-         }},
+      data: {:text_data, payload_with_signature},
       attributes: %{
         "expire_at" => %CloudEvents.CloudEventAttributeValue{
           attr: {:ce_timestamp, %{seconds: expire_at_ts}}
         },
         "time" => %CloudEvents.CloudEventAttributeValue{
           attr: {:ce_timestamp, %{seconds: time_ts}}
-        },
-        "signature" => %CloudEvents.CloudEventAttributeValue{
-          attr: {:ce_bytes, payload_with_signature}
         }
       },
       id: event_id,
@@ -94,7 +85,6 @@ defmodule Trento.ContractsTest do
       private_key: private_key,
       public_key: public_key
     } do
-
       signed_event =
         Trento.Contracts.to_signed_event(
           event,
@@ -134,22 +124,13 @@ defmodule Trento.ContractsTest do
       payload_with_signature: payload_with_signature
     } do
       cloudevent = %CloudEvent{
-        data:
-          {:proto_data,
-           %Google.Protobuf.Any{
-             __unknown_fields__: [],
-             type_url: "unknown.Event",
-             value: message_content
-           }},
+        data: {:text_data, payload_with_signature},
         attributes: %{
           "expire_at" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: expire_at_ts}}
           },
           "time" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: time_ts}}
-          },
-          "signature" => %CloudEvents.CloudEventAttributeValue{
-            attr: {:ce_bytes, payload_with_signature}
           }
         },
         id: UUID.uuid4(),
@@ -193,22 +174,13 @@ defmodule Trento.ContractsTest do
         |> Jason.encode!()
 
       cloudevent = %CloudEvent{
-        data:
-          {:proto_data,
-           %Google.Protobuf.Any{
-             __unknown_fields__: [],
-             type_url: "Test.Event",
-             value: message_content
-           }},
+        data: {:text_data, payload_with_signature},
         attributes: %{
           "expire_at" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: expire_at_ts}}
           },
           "time" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: time_ts}}
-          },
-          "signature" => %CloudEvents.CloudEventAttributeValue{
-            attr: {:ce_bytes, payload_with_signature}
           }
         },
         id: UUID.uuid4(),

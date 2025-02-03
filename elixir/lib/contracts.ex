@@ -29,11 +29,10 @@ defmodule Trento.Contracts do
   """
   @spec to_signed_event(struct(), binary(), Keyword.t()) :: binary()
   def to_signed_event(struct, pem_private_key, opts \\ []) do
-    updated_opts = [{:will_be_signed?, true} | opts]
+    updated_opts = [{:will_be_signed?, {true, pem_private_key}} | opts]
 
     struct
     |> build_cloud_event(updated_opts)
-    |> add_signature(pem_private_key, struct)
     |> CloudEvents.CloudEvent.encode()
   end
 
@@ -79,7 +78,7 @@ defmodule Trento.Contracts do
     id = Keyword.get(opts, :id, UUID.uuid4())
     source = Keyword.get(opts, :source, "trento")
     validity_in_seconds = Keyword.get(opts, :validity_in_seconds, @default_event_validity)
-    will_be_signed? = Keyword.get(opts, :will_be_signed?, false)
+    {will_be_signed?, maybe_pem_private_key} = Keyword.get(opts, :will_be_signed?, {false, ""})
 
     time =
       Keyword.get(
@@ -94,16 +93,18 @@ defmodule Trento.Contracts do
     expire_at_attr = %Google.Protobuf.Timestamp{seconds: expiration |> DateTime.to_unix()}
 
     data =
-      case will_be_signed? do
-        true ->
-          %{}
+      case {will_be_signed?, maybe_pem_private_key} do
+        {true, pem_private_key} ->
+          signed_payload = signed_text_payload(struct, time, expiration, pem_private_key)
+          {:text_data, signed_payload}
 
-        false ->
-          Protobuf.Encoder.encode(struct)
+        {false, ""} ->
+          payload = Protobuf.Encoder.encode(struct)
+          {:proto_data, %Google.Protobuf.Any{value: payload, type_url: get_type(mod)}}
       end
 
     %CloudEvents.CloudEvent{
-      data: {:proto_data, %Google.Protobuf.Any{value: data, type_url: get_type(mod)}},
+      data: data,
       spec_version: "1.0",
       type: get_type(mod),
       id: id,
@@ -117,31 +118,16 @@ defmodule Trento.Contracts do
     }
   end
 
-  defp add_signature(
-         %CloudEvents.CloudEvent{
-           data: {:proto_data, %Google.Protobuf.Any{value: _data}},
-           attributes:
-             %{
-               "time" => %CloudEvents.CloudEventAttributeValue{
-                 attr: {:ce_timestamp, %{seconds: time}}
-               },
-               "expire_at" => %CloudEvents.CloudEventAttributeValue{
-                 attr: {:ce_timestamp, %{seconds: expire_at}}
-               }
-             } = current_attrs
-         } = event,
-         pem_private_key,
-         struct
-       ) do
+  defp signed_text_payload(struct, time, expire_at, pem_private_key) do
     jwk = JOSE.JWK.from_pem(pem_private_key)
 
     {:ok, json_encodable_map} = Protobuf.JSON.to_encodable(struct, emit_unpopulated: false)
 
     wire_time =
-      time |> DateTime.from_unix!() |> DateTime.to_iso8601()
+      time |> DateTime.to_iso8601()
 
     wire_expire_at =
-      expire_at |> DateTime.from_unix!() |> DateTime.to_iso8601()
+      expire_at |> DateTime.to_iso8601()
 
     ts = %{"time" => wire_time, "expire_at" => wire_expire_at}
 
@@ -154,23 +140,16 @@ defmodule Trento.Contracts do
     updated_data_encodeable =
       Map.merge(json_encodable_map_with_ts, %{"signature" => compacted_signature})
 
-    updated_data = Jason.encode!(updated_data_encodeable)
-
-    %CloudEvents.CloudEvent{
-      event
-      | attributes:
-          Map.put(
-            current_attrs,
-            "signature",
-            %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, updated_data}}
-          )
-    }
+    Jason.encode!(updated_data_encodeable)
   end
 
   defp decode_cloud_event(data) do
     try do
       case CloudEvents.CloudEvent.decode(data) do
         %{type: type, data: {:proto_data, %Google.Protobuf.Any{value: _data}}} = cloud_event ->
+          {:ok, type, cloud_event}
+
+        %{type: type, data: {:text_data, _data}} = cloud_event ->
           {:ok, type, cloud_event}
 
         event ->
@@ -188,23 +167,20 @@ defmodule Trento.Contracts do
 
   defp verify_event_signature(
          %CloudEvents.CloudEvent{
-           data: {:proto_data, %Google.Protobuf.Any{value: _data}},
+           data: {:text_data, data},
            attributes: %{
              "time" => %CloudEvents.CloudEventAttributeValue{
                attr: {:ce_timestamp, %{seconds: _time}}
              },
              "expire_at" => %CloudEvents.CloudEventAttributeValue{
                attr: {:ce_timestamp, %{seconds: _expire_at}}
-             },
-             "signature" => %CloudEvents.CloudEventAttributeValue{
-               attr: {:ce_bytes, payload_with_signature}
              }
            }
          } = _event,
          public_key
        ) do
     jwk = JOSE.JWK.from_pem(public_key)
-    payload_decoded = Jason.decode!(payload_with_signature)
+    payload_decoded = Jason.decode!(data)
     signature = payload_decoded["signature"]
 
     case JOSE.JWS.verify(jwk, {%{}, signature}) do
