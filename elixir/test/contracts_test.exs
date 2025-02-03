@@ -29,8 +29,6 @@ defmodule Trento.ContractsTest do
     signature = JOSE.JWS.sign(jwk, canonical_message_content, jws)
     {_alg, compacted_signature} = JOSE.JWS.compact(signature)
 
-    message_content = %{}
-
     payload_with_signature =
       Map.merge(json_encodable_map_with_ts, %{"signature" => compacted_signature})
       |> Jason.encode!()
@@ -60,8 +58,7 @@ defmodule Trento.ContractsTest do
       event: event,
       time: time,
       time_ts: time_ts,
-      expire_at_ts: expire_at_ts,
-      message_content: message_content
+      expire_at_ts: expire_at_ts
     }
   end
 
@@ -81,7 +78,6 @@ defmodule Trento.ContractsTest do
       event_id: event_id,
       event: event,
       time: time,
-      cloudevent: cloudevent,
       private_key: private_key,
       public_key: public_key
     } do
@@ -118,7 +114,6 @@ defmodule Trento.ContractsTest do
 
     test "should return error if the event type is unknown", %{
       public_key: public_key,
-      message_content: message_content,
       expire_at_ts: expire_at_ts,
       time_ts: time_ts,
       payload_with_signature: payload_with_signature
@@ -148,7 +143,6 @@ defmodule Trento.ContractsTest do
     test "should return error if the event is expired", %{
       public_key: public_key,
       private_key: private_key,
-      message_content: message_content,
       time: time,
       time_ts: time_ts,
       event: event
@@ -197,7 +191,6 @@ defmodule Trento.ContractsTest do
 
     test "should return error if the event signature is not valid", %{
       public_key: public_key,
-      message_content: message_content,
       expire_at_ts: expire_at_ts,
       time_ts: time_ts,
       payload_with_signature: payload_with_signature
@@ -215,22 +208,13 @@ defmodule Trento.ContractsTest do
         |> Jason.encode!()
 
       cloudevent = %CloudEvent{
-        data:
-          {:proto_data,
-           %Google.Protobuf.Any{
-             __unknown_fields__: [],
-             type_url: "test.Event",
-             value: message_content
-           }},
+        data: {:text_data, updated_payload_with_invalid_sig},
         attributes: %{
           "expire_at" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: expire_at_ts}}
           },
           "time" => %CloudEvents.CloudEventAttributeValue{
             attr: {:ce_timestamp, %{seconds: time_ts}}
-          },
-          "signature" => %CloudEvents.CloudEventAttributeValue{
-            attr: {:ce_bytes, updated_payload_with_invalid_sig}
           }
         },
         id: UUID.uuid4(),
