@@ -19,7 +19,7 @@ asdf plugin add protoc-gen-go
 - Define `golang` version to `asdf` to enable `protoc-gen-go` usage. For that, edit `$HOME/.asdf/.tool-versions` and append the next line:
 
 ```
-golang 1.18.1
+golang 1.23.6
 ```
 
 - Install the required tool versions running:
