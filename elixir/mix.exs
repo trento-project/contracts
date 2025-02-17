@@ -31,11 +31,7 @@ defmodule Proto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   def deps do
     [
-      {:protobuf, "~> 0.12.0"},
-      # Only for files generated from Google's protos.
-      # Can be ignored if you don't use Google's protos.
-      # Or you can generate the code by yoprself.
-      {:google_protos, "~> 0.1"},
+      {:protobuf, "~> 0.14.0"},
       {:elixir_uuid, "~> 1.2"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
