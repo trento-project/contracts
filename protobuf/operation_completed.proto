@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package Trento.Operations.V1;
+option go_package = "/;events";
+
+enum OperationResult {
+    UPDATED = 0;
+    NOT_UPDATED = 1;
+    ROLLED_BACK = 2;
+    FAILED = 3;
+    ABORTED = 4;
+    ALREADY_RUNNING = 5;
+}
+
+message OperationCompleted {
+    string operation_id = 1;
+    string group_id = 2;
+    string operation_type = 3;
+    OperationResult result = 4;
+}
