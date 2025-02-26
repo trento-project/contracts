@@ -16,42 +16,53 @@ var ErrExpirationNotFound = errors.New("cannot decode cloudevent, expiration att
 var ErrExpirationAttributeMalformed = errors.New("cannot decode cloudevent, expiration attribute malformed")
 var ErrEventExpired = errors.New("cannot decode cloudevent, event expired")
 
-type cloudEventOptions struct {
+type encodeOptions struct {
 	id             string
 	source         string
 	time           time.Time
 	expirationTime time.Time
 }
 
-type Option = func(fields *cloudEventOptions)
+type decodeOptions struct {
+	checkExpiration bool
+}
 
-func WithID(id string) Option {
-	return func(fields *cloudEventOptions) {
+type EncodeOption = func(fields *encodeOptions)
+type DecodeOption = func(fields *decodeOptions)
+
+func WithID(id string) EncodeOption {
+	return func(fields *encodeOptions) {
 		fields.id = id
 	}
 }
 
-func WithSource(source string) Option {
-	return func(fields *cloudEventOptions) {
+func WithSource(source string) EncodeOption {
+	return func(fields *encodeOptions) {
 		fields.source = source
 	}
 }
 
-func WithTime(time time.Time) Option {
-	return func(fields *cloudEventOptions) {
+func WithTime(time time.Time) EncodeOption {
+	return func(fields *encodeOptions) {
 		fields.time = time
 	}
 }
 
-func WithExpiration(expirationTime time.Time) Option {
-	return func(fields *cloudEventOptions) {
+func WithExpiration(expirationTime time.Time) EncodeOption {
+	return func(fields *encodeOptions) {
 		fields.expirationTime = expirationTime
 	}
 }
 
-func ToEvent(event proto.Message, opts ...Option) ([]byte, error) {
+func WithExpirationCheck() DecodeOption {
+	return func(fields *decodeOptions) {
+		fields.checkExpiration = true
+	}
+}
+
+func ToEvent(event proto.Message, opts ...EncodeOption) ([]byte, error) {
 	now := time.Now()
-	options := &cloudEventOptions{
+	options := &encodeOptions{
 		id:             uuid.NewString(),
 		source:         "https://github.com/trento-project",
 		time:           now,
@@ -101,7 +112,15 @@ func ToEvent(event proto.Message, opts ...Option) ([]byte, error) {
 	return rawCe, nil
 }
 
-func FromEvent(src []byte, to proto.Message) error {
+func FromEvent(src []byte, to proto.Message, opts ...DecodeOption) error {
+	options := &decodeOptions{
+		checkExpiration: false,
+	}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
 	var decodedCe CloudEvent
 	err := proto.Unmarshal(src, &decodedCe)
 	if err != nil {
@@ -113,20 +132,23 @@ func FromEvent(src []byte, to proto.Message) error {
 		return err
 	}
 
-	// Check event expiration
-	expirationAttr, found := decodedCe.GetAttributes()["expiration"]
-	if !found {
-		return ErrExpirationNotFound
-	}
+	if options.checkExpiration {
+		// Check event expiration
+		expirationAttr, found := decodedCe.GetAttributes()["expiration"]
+		if !found {
+			return ErrExpirationNotFound
+		}
 
-	expirationTS := expirationAttr.GetCeTimestamp()
-	if expirationTS == nil {
-		return ErrExpirationAttributeMalformed
-	}
+		expirationTS := expirationAttr.GetCeTimestamp()
+		if expirationTS == nil {
+			return ErrExpirationAttributeMalformed
+		}
 
-	eventExpiration := expirationTS.AsTime()
-	if eventExpiration.Before(time.Now()) {
-		return ErrEventExpired
+		eventExpiration := expirationTS.AsTime()
+		if eventExpiration.Before(time.Now()) {
+			return ErrEventExpired
+		}
+
 	}
 
 	return nil

@@ -140,7 +140,6 @@ func TestFromEvent(t *testing.T) {
 	assert.NoError(t, err)
 
 	now := time.Now()
-	expiration := now.Add(60 * time.Minute)
 
 	ce := events.CloudEvent{
 		Id:          "id",
@@ -154,11 +153,6 @@ func TestFromEvent(t *testing.T) {
 			"time": {
 				Attr: &events.CloudEventAttributeValue_CeTimestamp{
 					CeTimestamp: timestamppb.New(now),
-				},
-			},
-			"expiration": {
-				Attr: &events.CloudEventAttributeValue_CeTimestamp{
-					CeTimestamp: timestamppb.New(expiration),
 				},
 			},
 		},
@@ -230,7 +224,7 @@ func TestFromEventExpiredEventError(t *testing.T) {
 
 	rawEvent, err := proto.Marshal(&ce)
 	assert.NoError(t, err)
-	err = events.FromEvent(rawEvent, &decodedEvent)
+	err = events.FromEvent(rawEvent, &decodedEvent, events.WithExpirationCheck())
 	assert.ErrorIs(t, err, events.ErrEventExpired)
 }
 
@@ -279,7 +273,7 @@ func TestFromEventNoExpirationSetError(t *testing.T) {
 
 	rawEvent, err := proto.Marshal(&ce)
 	assert.NoError(t, err)
-	err = events.FromEvent(rawEvent, &decodedEvent)
+	err = events.FromEvent(rawEvent, &decodedEvent, events.WithExpirationCheck())
 	assert.ErrorIs(t, err, events.ErrExpirationNotFound)
 }
 
@@ -331,6 +325,6 @@ func TestFromEventExpirationMalformedError(t *testing.T) {
 
 	rawEvent, err := proto.Marshal(&ce)
 	assert.NoError(t, err)
-	err = events.FromEvent(rawEvent, &decodedEvent)
+	err = events.FromEvent(rawEvent, &decodedEvent, events.WithExpirationCheck())
 	assert.ErrorIs(t, err, events.ErrExpirationAttributeMalformed)
 }
