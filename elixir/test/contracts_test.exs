@@ -102,13 +102,13 @@ defmodule Trento.ContractsTest do
       assert {:error, :invalid_envelope} = Trento.Contracts.from_event(event)
     end
 
-    test "should return error if the could not be decoded" do
+    test "should return error if the event could not be decoded" do
       event = <<0, 0>>
 
       assert {:error, :decoding_error} = Trento.Contracts.from_event(event)
     end
 
-    test "should return error if the event type is unknown" do
+    test "should return error if an event type is unknown" do
       cloudevent = %CloudEvent{
         data:
           {:proto_data,
