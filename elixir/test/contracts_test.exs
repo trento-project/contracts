@@ -194,7 +194,7 @@ defmodule Trento.ContractsTest do
         )
 
       assert id == cloudevent_id
-      assert cloudevent_source == "trento"
+      assert cloudevent_source == "https://github.com/trento-project"
       refute time_ts == nil
       refute expiration_ts == nil
 
