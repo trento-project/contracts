@@ -9,9 +9,7 @@ defmodule Trento.ContractsTest do
       event_id = UUID.uuid4()
       event = %Test.Event{id: event_id}
       time = DateTime.utc_now()
-      expiration = DateTime.add(time, 2, :minute)
       time_attr = %Google.Protobuf.Timestamp{seconds: time |> DateTime.to_unix()}
-      expiration_attr = %Google.Protobuf.Timestamp{seconds: expiration |> DateTime.to_unix()}
 
       cloudevent = %CloudEvent{
         data:
@@ -26,10 +24,7 @@ defmodule Trento.ContractsTest do
         spec_version: "1.0",
         type: "test.Event",
         attributes: %{
-          "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}},
-          "expiration" => %CloudEvents.CloudEventAttributeValue{
-            attr: {:ce_timestamp, expiration_attr}
-          }
+          "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}}
         }
       }
 
@@ -38,7 +33,7 @@ defmodule Trento.ContractsTest do
       assert {:ok, %Test.Event{id: ^event_id}} = Trento.Contracts.from_event(encoded_cloudevent)
     end
 
-    test "should return an error when the event is expired" do
+    test "should return an error when the event is expired and expiration validation is enabled" do
       event_id = UUID.uuid4()
       event = %Test.Event{id: event_id}
       time = DateTime.add(DateTime.utc_now(), -2, :minute)
@@ -67,10 +62,12 @@ defmodule Trento.ContractsTest do
       }
 
       encoded_cloudevent = CloudEvent.encode(cloudevent)
-      assert {:error, :event_expired} = Trento.Contracts.from_event(encoded_cloudevent)
+
+      assert {:error, :event_expired} =
+               Trento.Contracts.from_event(encoded_cloudevent, validate_expiration: true)
     end
 
-    test "should return an error when the event does not have the expiration attribute" do
+    test "should return an error when the event does not have the expiration attribute and expiration validation is enabled" do
       event_id = UUID.uuid4()
       event = %Test.Event{id: event_id}
       time = DateTime.add(DateTime.utc_now(), -2, :minute)
@@ -96,7 +93,7 @@ defmodule Trento.ContractsTest do
       encoded_cloudevent = CloudEvent.encode(cloudevent)
 
       assert {:error, :expiration_attribute_not_found} =
-               Trento.Contracts.from_event(encoded_cloudevent)
+               Trento.Contracts.from_event(encoded_cloudevent, validate_expiration: true)
     end
 
     test "should return error if the event is not wrapped in a CloudEvent" do

@@ -59,14 +59,21 @@ defmodule Trento.Contracts do
   @doc """
   Decode and unwrap a protobuf CloudEvent to an event struct.
   """
-  @spec from_event(binary()) ::
+  @spec from_event(binary(), Keyword.t()) ::
           {:ok, struct()}
           | {:error, :decoding_error}
           | {:error, :invalid_envelope}
           | {:error, :event_not_found}
-  def from_event(value) do
+  def from_event(value, opts \\ []) do
+    validate_expiration =
+      Keyword.get(
+        opts,
+        :validate_expiration,
+        false
+      )
+
     try do
-      case decode_and_validate(value) do
+      case decode_and_validate(value, validate_expiration) do
         {:ok, event} ->
           {:ok, event}
 
@@ -83,10 +90,10 @@ defmodule Trento.Contracts do
     end
   end
 
-  defp decode_and_validate(value) do
+  defp decode_and_validate(value, validate_expiration) do
     with {:ok, event_type, attributes, event_data} <- extract_event(value),
          {:ok, decoded_event} <- decode_trento_event(event_type, event_data),
-         {:ok, _} <- validate_event_expiration(attributes) do
+         :ok <- maybe_validate_expiration(attributes, !validate_expiration) do
       {:ok, decoded_event}
     end
   end
@@ -123,21 +130,26 @@ defmodule Trento.Contracts do
     |> String.replace("Elixir.", "")
   end
 
-  defp validate_event_expiration(%{
-         "expiration" => %CloudEvents.CloudEventAttributeValue{
-           attr: {:ce_timestamp, %Google.Protobuf.Timestamp{seconds: unix_expiration}}
-         }
-       }) do
+  defp maybe_validate_expiration(_payload, true), do: :ok
+
+  defp maybe_validate_expiration(
+         %{
+           "expiration" => %CloudEvents.CloudEventAttributeValue{
+             attr: {:ce_timestamp, %Google.Protobuf.Timestamp{seconds: unix_expiration}}
+           }
+         },
+         _skip_validation
+       ) do
     expiration = DateTime.from_unix!(unix_expiration)
 
     if DateTime.after?(expiration, DateTime.utc_now()) do
-      {:ok, expiration}
+      :ok
     else
       {:error, :event_expired}
     end
   end
 
-  defp validate_event_expiration(_) do
+  defp maybe_validate_expiration(_, _skip_validation) do
     {:error, :expiration_attribute_not_found}
   end
 end
