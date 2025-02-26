@@ -16,7 +16,7 @@ defmodule Trento.Contracts do
   @spec to_event(struct(), Keyword.t()) :: binary()
   def to_event(%mod{} = struct, opts \\ []) do
     id = Keyword.get(opts, :id, UUID.uuid4())
-    source = Keyword.get(opts, :source, "trento")
+    source = Keyword.get(opts, :source, "https://github.com/trento-project")
 
     time =
       Keyword.get(
