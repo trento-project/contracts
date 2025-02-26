@@ -1,6 +1,7 @@
 package events
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,10 +10,17 @@ import (
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
+const defaultExpirationWindow = 5 * time.Minute
+
+var ErrExpirationNotFound = errors.New("cannot decode cloudevent, expiration attribute not found")
+var ErrExpirationAttributeMalformed = errors.New("cannot decode cloudevent, expiration attribute malformed")
+var ErrEventExpired = errors.New("cannot decode cloudevent, event expired")
+
 type cloudEventOptions struct {
-	id     string
-	source string
-	time   time.Time
+	id             string
+	source         string
+	time           time.Time
+	expirationTime time.Time
 }
 
 type Option = func(fields *cloudEventOptions)
@@ -35,12 +43,21 @@ func WithTime(time time.Time) Option {
 	}
 }
 
-func ToEvent(event proto.Message, opts ...Option) ([]byte, error) {
-	options := &cloudEventOptions{
-		id:     uuid.NewString(),
-		source: "https://github.com/trento-project",
-		time:   time.Now(),
+func WithExpiration(expirationTime time.Time) Option {
+	return func(fields *cloudEventOptions) {
+		fields.expirationTime = expirationTime
 	}
+}
+
+func ToEvent(event proto.Message, opts ...Option) ([]byte, error) {
+	now := time.Now()
+	options := &cloudEventOptions{
+		id:             uuid.NewString(),
+		source:         "https://github.com/trento-project",
+		time:           now,
+		expirationTime: now.Add(defaultExpirationWindow),
+	}
+
 	for _, opt := range opts {
 		opt(options)
 	}
@@ -50,9 +67,15 @@ func ToEvent(event proto.Message, opts ...Option) ([]byte, error) {
 		return nil, err
 	}
 
-	attr := CloudEventAttributeValue{
+	timeAttr := CloudEventAttributeValue{
 		Attr: &CloudEventAttributeValue_CeTimestamp{
 			CeTimestamp: timestamppb.New(options.time),
+		},
+	}
+
+	expirationAttr := CloudEventAttributeValue{
+		Attr: &CloudEventAttributeValue_CeTimestamp{
+			CeTimestamp: timestamppb.New(options.expirationTime),
 		},
 	}
 
@@ -65,7 +88,8 @@ func ToEvent(event proto.Message, opts ...Option) ([]byte, error) {
 			ProtoData: data,
 		},
 		Attributes: map[string]*CloudEventAttributeValue{
-			"time": &attr,
+			"time":       &timeAttr,
+			"expiration": &expirationAttr,
 		},
 	}
 
@@ -87,6 +111,22 @@ func FromEvent(src []byte, to proto.Message) error {
 	err = anypb.UnmarshalTo(decodedCe.GetProtoData(), to, proto.UnmarshalOptions{})
 	if err != nil {
 		return err
+	}
+
+	// Check event expiration
+	expirationAttr, found := decodedCe.GetAttributes()["expiration"]
+	if !found {
+		return ErrExpirationNotFound
+	}
+
+	expirationTS := expirationAttr.GetCeTimestamp()
+	if expirationTS == nil {
+		return ErrExpirationAttributeMalformed
+	}
+
+	eventExpiration := expirationTS.AsTime()
+	if eventExpiration.Before(time.Now()) {
+		return ErrEventExpired
 	}
 
 	return nil
