@@ -93,7 +93,7 @@ defmodule Trento.Contracts do
   defp decode_and_validate(value, validate_expiration) do
     with {:ok, event_type, attributes, event_data} <- extract_event(value),
          {:ok, decoded_event} <- decode_trento_event(event_type, event_data),
-         :ok <- maybe_validate_expiration(attributes, !validate_expiration) do
+         :ok <- maybe_validate_expiration(attributes, validate_expiration) do
       {:ok, decoded_event}
     end
   end
@@ -130,7 +130,7 @@ defmodule Trento.Contracts do
     |> String.replace("Elixir.", "")
   end
 
-  defp maybe_validate_expiration(_payload, true), do: :ok
+  defp maybe_validate_expiration(_payload, false), do: :ok
 
   defp maybe_validate_expiration(
          %{
@@ -138,7 +138,7 @@ defmodule Trento.Contracts do
              attr: {:ce_timestamp, %Google.Protobuf.Timestamp{seconds: unix_expiration}}
            }
          },
-         _skip_validation
+         true
        ) do
     expiration = DateTime.from_unix!(unix_expiration)
 
