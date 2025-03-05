@@ -12,7 +12,7 @@ env:
 jobs:
   elixir-deps:
     name: Elixir dependencies (Elixir ${{ matrix.elixir }}, OTP ${{ matrix.otp }})
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         include:
@@ -38,8 +38,6 @@ jobs:
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
-        env:
-          ImageOS: ubuntu20
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@v4
@@ -65,7 +63,7 @@ jobs:
   static-code-analysis-elixir:
     name: Static Code Analysis elixir
     needs: [elixir-deps]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Cancel Previous Runs
@@ -83,8 +81,6 @@ jobs:
         with:
           elixir-version: ${{ env.ELIXIR_VERSION }}
           otp-version: ${{ env.OTP_VERSION }}
-        env:
-          ImageOS: ubuntu20
 
       - name: Retrieve Elixir Cached Dependencies
         uses: actions/cache@v4
@@ -115,7 +111,7 @@ jobs:
   check-elixir-contracts:
     name: Check elixir contracts
     needs: [elixir-deps]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -127,8 +123,6 @@ jobs:
         with:
           elixir-version: ${{ env.ELIXIR_VERSION }}
           otp-version: ${{ env.OTP_VERSION }}
-        env:
-          ImageOS: ubuntu20
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@v4
@@ -160,7 +154,7 @@ jobs:
 
   check-go-contracts:
     name: Check go contracts
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -188,7 +182,7 @@ jobs:
   test-golang:
     name: Go test
     needs: [check-go-contracts]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Cancel Previous Runs
@@ -212,7 +206,7 @@ jobs:
   test-elixir:
     name: Elixir test (Elixir ${{ matrix.elixir }}, OTP ${{ matrix.otp }})
     needs: [elixir-deps, check-elixir-contracts]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         include:
