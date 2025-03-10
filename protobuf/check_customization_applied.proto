@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package Trento.Checks.V1;
+option go_package = "/;events";
+
+import "protobuf/check_custom_value.proto";
+
+message CheckCustomizationApplied {
+    string check_id = 1;
+    string group_id = 2;
+    string target_type = 3;
+    repeated CheckCustomValue custom_values = 4;
+}
