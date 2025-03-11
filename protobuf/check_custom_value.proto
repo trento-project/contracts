@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package Trento.Checks.V1;
+option go_package = "/;events";
+
+message CheckCustomValue {
+    string name = 1;
+    oneof value {
+        string string_value = 2;
+        int32 int_value = 3;
+        bool bool_value = 4;
+    }
+    oneof original_value {
+        string string_original_value = 5;
+        int32 int_original_value = 6;
+        bool bool_original_value = 7;
+    }
+}
