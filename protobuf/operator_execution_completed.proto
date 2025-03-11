@@ -12,9 +12,14 @@ enum OperationPhase {
     ROLLBACK = 3;
 }
 
+message Diff {
+  google.protobuf.Value before = 1;
+  google.protobuf.Value after = 2;
+}
+
 message OperationResponse {
   OperationPhase phase = 1;
-  map<string, google.protobuf.Value> diff = 2;
+  Diff diff = 2;
 }
 
 message OperationResponseError {

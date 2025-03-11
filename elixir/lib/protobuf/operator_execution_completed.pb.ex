@@ -9,13 +9,13 @@ defmodule Trento.Operations.V1.OperationPhase do
   field :ROLLBACK, 3
 end
 
-defmodule Trento.Operations.V1.OperationResponse.DiffEntry do
+defmodule Trento.Operations.V1.Diff do
   @moduledoc false
 
-  use Protobuf, map: true, protoc_gen_elixir_version: "0.14.1", syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.14.1", syntax: :proto3
 
-  field :key, 1, type: :string
-  field :value, 2, type: Google.Protobuf.Value
+  field :before, 1, type: Google.Protobuf.Value
+  field :after, 2, type: Google.Protobuf.Value
 end
 
 defmodule Trento.Operations.V1.OperationResponse do
@@ -24,11 +24,7 @@ defmodule Trento.Operations.V1.OperationResponse do
   use Protobuf, protoc_gen_elixir_version: "0.14.1", syntax: :proto3
 
   field :phase, 1, type: Trento.Operations.V1.OperationPhase, enum: true
-
-  field :diff, 2,
-    repeated: true,
-    type: Trento.Operations.V1.OperationResponse.DiffEntry,
-    map: true
+  field :diff, 2, type: Trento.Operations.V1.Diff
 end
 
 defmodule Trento.Operations.V1.OperationResponseError do
