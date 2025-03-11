@@ -5,25 +5,25 @@ option go_package = "/;events";
 
 import "google/protobuf/struct.proto";
 
-enum OperationPhase {
+enum OperatorPhase {
     PLAN = 0;
     COMMIT = 1;
     VERIFY = 2;
     ROLLBACK = 3;
 }
 
-message Diff {
+message OperatorDiff {
   google.protobuf.Value before = 1;
   google.protobuf.Value after = 2;
 }
 
-message OperationResponse {
-  OperationPhase phase = 1;
-  Diff diff = 2;
+message OperatorResponse {
+  OperatorPhase phase = 1;
+  OperatorDiff diff = 2;
 }
 
-message OperationResponseError {
-  OperationPhase phase = 1;
+message OperatorError {
+  OperatorPhase phase = 1;
   string message = 2;
 }
 
@@ -34,7 +34,7 @@ message OperatorExecutionCompleted {
     string agent_id = 4;
 
     oneof result {
-        OperationResponse value = 5;
-        OperationResponseError error = 6;
+        OperatorResponse value = 5;
+        OperatorError error = 6;
     }
 }
