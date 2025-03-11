@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package Trento.Operations.V1;
+option go_package = "/;events";
+
+import "google/protobuf/struct.proto";
+
+message OperatorExecutionRequestedTarget {
+    string agent_id = 1;
+    string operator = 2;
+    map<string, google.protobuf.Value> arguments = 3;
+}
+
+message OperatorExecutionRequested {
+    string operation_id = 1;
+    string group_id = 2;
+    int32 step_number = 3;
+    repeated OperatorExecutionRequestedTarget targets = 4;
+}

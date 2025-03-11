@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package Trento.Operations.V1;
+option go_package = "/;events";
+
+import "google/protobuf/struct.proto";
+
+enum OperationPhase {
+    PLAN = 0;
+    COMMIT = 1;
+    VERIFY = 2;
+    ROLLBACK = 3;
+}
+
+message OperationResponse {
+  OperationPhase phase = 1;
+  map<string, google.protobuf.Value> diff = 2;
+}
+
+message OperationResponseError {
+  OperationPhase phase = 1;
+  string message = 2;
+}
+
+message OperatorExecutionCompleted {
+    string operation_id = 1;
+    string group_id = 2;
+    int32 step_number = 3;
+    string agent_id = 4;
+
+    oneof result {
+        OperationResponse value = 5;
+        OperationResponseError error = 6;
+    }
+}
