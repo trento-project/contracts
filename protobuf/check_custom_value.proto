@@ -10,9 +10,4 @@ message CheckCustomValue {
         int32 int_value = 3;
         bool bool_value = 4;
     }
-    oneof original_value {
-        string string_original_value = 5;
-        int32 int_original_value = 6;
-        bool bool_original_value = 7;
-    }
 }
