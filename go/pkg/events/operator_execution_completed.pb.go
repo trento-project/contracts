@@ -248,6 +248,7 @@ type OperatorExecutionCompleted struct {
 	StepNumber  int32  `protobuf:"varint,3,opt,name=step_number,json=stepNumber,proto3" json:"step_number,omitempty"`
 	AgentId     string `protobuf:"bytes,4,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
 	// Types that are assignable to Result:
+	//
 	//	*OperatorExecutionCompleted_Value
 	//	*OperatorExecutionCompleted_Error
 	Result isOperatorExecutionCompleted_Result `protobuf_oneof:"result"`
