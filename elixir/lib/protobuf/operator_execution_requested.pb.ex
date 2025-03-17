@@ -13,9 +13,8 @@ defmodule Trento.Operations.V1.OperatorExecutionRequestedTarget do
   use Protobuf, protoc_gen_elixir_version: "0.14.1", syntax: :proto3
 
   field :agent_id, 1, type: :string, json_name: "agentId"
-  field :operator, 2, type: :string
 
-  field :arguments, 3,
+  field :arguments, 2,
     repeated: true,
     type: Trento.Operations.V1.OperatorExecutionRequestedTarget.ArgumentsEntry,
     map: true
@@ -29,5 +28,6 @@ defmodule Trento.Operations.V1.OperatorExecutionRequested do
   field :operation_id, 1, type: :string, json_name: "operationId"
   field :group_id, 2, type: :string, json_name: "groupId"
   field :step_number, 3, type: :int32, json_name: "stepNumber"
-  field :targets, 4, repeated: true, type: Trento.Operations.V1.OperatorExecutionRequestedTarget
+  field :operator, 4, type: :string
+  field :targets, 5, repeated: true, type: Trento.Operations.V1.OperatorExecutionRequestedTarget
 end
