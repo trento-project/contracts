@@ -27,6 +27,7 @@ type CheckCustomValue struct {
 
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// Types that are assignable to Value:
+	//
 	//	*CheckCustomValue_StringValue
 	//	*CheckCustomValue_IntValue
 	//	*CheckCustomValue_BoolValue
