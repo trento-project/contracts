@@ -4,23 +4,6 @@ defmodule Trento.ContractsTest do
 
   alias CloudEvents.CloudEvent
 
-  def build_cloud_event(id, event, attributes) do
-    %CloudEvent{
-      data:
-        {:proto_data,
-         %Google.Protobuf.Any{
-           __unknown_fields__: [],
-           type_url: "Test.Event",
-           value: Test.Event.encode(event)
-         }},
-      id: id,
-      source: "wandalorian",
-      spec_version: "1.0",
-      type: "Test.Event",
-      attributes: attributes
-    }
-  end
-
   describe "event decoding" do
     test "should decode to the right struct when no errors are detected in the event payload" do
       event_id = UUID.uuid4()
@@ -310,5 +293,22 @@ defmodule Trento.ContractsTest do
                  }
                )
     end
+  end
+
+  defp build_cloud_event(id, event, attributes) do
+    %CloudEvent{
+      data:
+        {:proto_data,
+         %Google.Protobuf.Any{
+           __unknown_fields__: [],
+           type_url: "Test.Event",
+           value: Test.Event.encode(event)
+         }},
+      id: id,
+      source: "wandalorian",
+      spec_version: "1.0",
+      type: "Test.Event",
+      attributes: attributes
+    }
   end
 end
