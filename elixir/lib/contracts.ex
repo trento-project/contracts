@@ -129,7 +129,7 @@ defmodule Trento.Contracts do
 
   defp encode_additional_attributes(attributes) do
     Enum.into(attributes, %{}, fn {key, {type, value}} ->
-      {Atom.to_string(key), %CloudEvents.CloudEventAttributeValue{attr: {type, value}}}
+      {key, %CloudEvents.CloudEventAttributeValue{attr: {type, value}}}
     end)
   end
 

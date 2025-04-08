@@ -255,13 +255,13 @@ defmodule Trento.ContractsTest do
                  time: time,
                  expiration: expiration,
                  additional_attributes: %{
-                   user_id: {:ce_integer, user_id},
-                   foo: {:ce_string, "bar"},
-                   baz: {:ce_bytes, <<1, 2, 3>>},
-                   qux: {:ce_boolean, true},
-                   quux: {:ce_uri, "https://example.com"},
-                   corge: {:ce_uri_ref, "https://example.com"},
-                   grault: {:ce_timestamp, %Google.Protobuf.Timestamp{seconds: 123_456_789}}
+                   "user_id" => {:ce_integer, user_id},
+                   "foo" => {:ce_string, "bar"},
+                   "baz" => {:ce_bytes, <<1, 2, 3>>},
+                   "qux" => {:ce_boolean, true},
+                   "quux" => {:ce_uri, "https://example.com"},
+                   "corge" => {:ce_uri_ref, "https://example.com"},
+                   "grault" => {:ce_timestamp, %Google.Protobuf.Timestamp{seconds: 123_456_789}}
                  }
                )
     end
