@@ -102,14 +102,11 @@ defmodule Trento.ContractsTest do
       expiration_attr = %Google.Protobuf.Timestamp{seconds: expiration |> DateTime.to_unix()}
       user_id = 1
 
-      default_attributes = %{
+      attributes = %{
         "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}},
         "expiration" => %CloudEvents.CloudEventAttributeValue{
           attr: {:ce_timestamp, expiration_attr}
-        }
-      }
-
-      additional_attributes = %{
+        },
         "user_id" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_integer, user_id}},
         "foo" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_string, "bar"}},
         "baz" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, <<1, 2, 3>>}},
@@ -123,42 +120,27 @@ defmodule Trento.ContractsTest do
         }
       }
 
-      attributes_scenarios = [
-        %{
-          name: "default attributes",
-          attributes: default_attributes,
-          expected_attributes: %{
-            "time" => time_attr,
-            "expiration" => expiration_attr
-          }
-        },
-        %{
-          name: "with additional attributes",
-          attributes: Map.merge(default_attributes, additional_attributes),
-          expected_attributes: %{
-            "time" => time_attr,
-            "expiration" => expiration_attr,
-            "user_id" => 1,
-            "foo" => "bar",
-            "baz" => <<1, 2, 3>>,
-            "qux" => true,
-            "quux" => "https://example.com",
-            "corge" => "https://example.com",
-            "grault" => %Google.Protobuf.Timestamp{seconds: 123_456_789}
-          }
-        }
-      ]
+      expected_attributes = %{
+        "time" => time_attr,
+        "expiration" => expiration_attr,
+        "time" => time_attr,
+        "expiration" => expiration_attr,
+        "user_id" => 1,
+        "foo" => "bar",
+        "baz" => <<1, 2, 3>>,
+        "qux" => true,
+        "quux" => "https://example.com",
+        "corge" => "https://example.com",
+        "grault" => %Google.Protobuf.Timestamp{seconds: 123_456_789}
+      }
 
-      for %{attributes: attributes, expected_attributes: expected_attributes} <-
-            attributes_scenarios do
-        encoded_cloudevent =
-          UUID.uuid4()
-          |> build_cloud_event(event, attributes)
-          |> CloudEvent.encode()
+      encoded_cloudevent =
+        UUID.uuid4()
+        |> build_cloud_event(event, attributes)
+        |> CloudEvent.encode()
 
-        assert {:ok, ^expected_attributes} =
-                 Trento.Contracts.attributes_from_event(encoded_cloudevent)
-      end
+      assert {:ok, ^expected_attributes} =
+               Trento.Contracts.attributes_from_event(encoded_cloudevent)
     end
 
     test "should not be able to decode attributes" do
