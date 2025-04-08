@@ -243,38 +243,28 @@ defmodule Trento.ContractsTest do
       expiration_attr = %Google.Protobuf.Timestamp{seconds: expiration |> DateTime.to_unix()}
       user_id = 1
 
-      cloudevent = %CloudEvent{
-        data:
-          {:proto_data,
-           %Google.Protobuf.Any{
-             __unknown_fields__: [],
-             type_url: "Test.Event",
-             value: Test.Event.encode(event)
-           }},
-        id: cloudevent_id,
-        source: "wandalorian",
-        spec_version: "1.0",
-        type: "Test.Event",
-        attributes: %{
-          "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}},
-          "expiration" => %CloudEvents.CloudEventAttributeValue{
-            attr: {:ce_timestamp, expiration_attr}
-          },
-          "user_id" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_integer, user_id}},
-          "foo" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_string, "bar"}},
-          "baz" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, <<1, 2, 3>>}},
-          "qux" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_boolean, true}},
-          "quux" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_uri, "https://example.com"}},
-          "corge" => %CloudEvents.CloudEventAttributeValue{
-            attr: {:ce_uri_ref, "https://example.com"}
-          },
-          "grault" => %CloudEvents.CloudEventAttributeValue{
-            attr: {:ce_timestamp, %Google.Protobuf.Timestamp{seconds: 123_456_789}}
-          }
+      attributes = %{
+        "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}},
+        "expiration" => %CloudEvents.CloudEventAttributeValue{
+          attr: {:ce_timestamp, expiration_attr}
+        },
+        "user_id" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_integer, user_id}},
+        "foo" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_string, "bar"}},
+        "baz" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_bytes, <<1, 2, 3>>}},
+        "qux" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_boolean, true}},
+        "quux" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_uri, "https://example.com"}},
+        "corge" => %CloudEvents.CloudEventAttributeValue{
+          attr: {:ce_uri_ref, "https://example.com"}
+        },
+        "grault" => %CloudEvents.CloudEventAttributeValue{
+          attr: {:ce_timestamp, %Google.Protobuf.Timestamp{seconds: 123_456_789}}
         }
       }
 
-      encoded_cloudevent = CloudEvent.encode(cloudevent)
+      encoded_cloudevent =
+        cloudevent_id
+        |> build_cloud_event(event, attributes)
+        |> CloudEvent.encode()
 
       assert encoded_cloudevent ==
                Trento.Contracts.to_event(event,
