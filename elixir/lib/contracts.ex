@@ -34,8 +34,17 @@ defmodule Trento.Contracts do
         DateTime.add(time, @default_expiration_window_minutes, :minute)
       )
 
+    additional_attributes = Keyword.get(opts, :additional_attributes, %{})
+
     time_attr = %Google.Protobuf.Timestamp{seconds: time |> DateTime.to_unix()}
     expiration_attr = %Google.Protobuf.Timestamp{seconds: expiration |> DateTime.to_unix()}
+
+    default_attributes = %{
+      "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}},
+      "expiration" => %CloudEvents.CloudEventAttributeValue{
+        attr: {:ce_timestamp, expiration_attr}
+      }
+    }
 
     data = Protobuf.Encoder.encode(struct)
 
@@ -44,12 +53,11 @@ defmodule Trento.Contracts do
       spec_version: "1.0",
       type: get_type(mod),
       id: id,
-      attributes: %{
-        "time" => %CloudEvents.CloudEventAttributeValue{attr: {:ce_timestamp, time_attr}},
-        "expiration" => %CloudEvents.CloudEventAttributeValue{
-          attr: {:ce_timestamp, expiration_attr}
-        }
-      },
+      attributes:
+        Map.merge(
+          default_attributes,
+          encode_additional_attributes(additional_attributes)
+        ),
       source: source
     }
 
@@ -63,7 +71,7 @@ defmodule Trento.Contracts do
           {:ok, struct()}
           | {:error, :decoding_error}
           | {:error, :invalid_envelope}
-          | {:error, :event_not_found}
+          | {:error, :unknown_event}
   def from_event(value, opts \\ []) do
     validate_expiration =
       Keyword.get(
@@ -72,21 +80,22 @@ defmodule Trento.Contracts do
         false
       )
 
-    try do
-      case decode_and_validate(value, validate_expiration) do
-        {:ok, event} ->
-          {:ok, event}
+    case decode_and_validate(value, validate_expiration) do
+      {:ok, event} ->
+        {:ok, event}
 
-        {:error, reason} ->
-          Logger.error("Invalid trento event: #{inspect(reason)}")
+      {:error, reason} ->
+        Logger.error("Invalid trento event: #{inspect(reason)}")
 
-          {:error, reason}
-      end
-    rescue
-      error ->
-        Logger.error("Decoding error: #{inspect(error)}")
+        {:error, reason}
+    end
+  end
 
-        {:error, :decoding_error}
+  @spec attributes_from_event(binary()) ::
+          {:ok, map()} | {:error, :invalid_envelope | :decoding_error}
+  def attributes_from_event(event) do
+    with {:ok, _, attributes, _} <- extract_event(event) do
+      {:ok, decode_attributes(attributes)}
     end
   end
 
@@ -111,17 +120,32 @@ defmodule Trento.Contracts do
         Logger.error("Invalid cloud event: #{inspect(invalid_event)}")
         {:error, :invalid_envelope}
     end
+  rescue
+    error ->
+      Logger.error("Decoding error: #{inspect(error)}")
+
+      {:error, :decoding_error}
+  end
+
+  defp encode_additional_attributes(attributes) do
+    Enum.into(attributes, %{}, fn {key, {type, value}} ->
+      {key, %CloudEvents.CloudEventAttributeValue{attr: {type, value}}}
+    end)
+  end
+
+  defp decode_attributes(attributes) do
+    Enum.into(attributes, %{}, fn {key, %CloudEvents.CloudEventAttributeValue{attr: attr}} ->
+      {key, attr}
+    end)
   end
 
   defp decode_trento_event(type, data) do
-    try do
-      module_name = Macro.camelize(type)
-      module = Module.safe_concat([module_name])
+    module_name = Macro.camelize(type)
+    module = Module.safe_concat([module_name])
 
-      {:ok, module.decode(data)}
-    rescue
-      ArgumentError -> {:error, :unknown_event}
-    end
+    {:ok, module.decode(data)}
+  rescue
+    ArgumentError -> {:error, :unknown_event}
   end
 
   defp get_type(mod) do
