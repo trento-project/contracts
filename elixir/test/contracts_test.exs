@@ -121,17 +121,15 @@ defmodule Trento.ContractsTest do
       }
 
       expected_attributes = %{
-        "time" => time_attr,
-        "expiration" => expiration_attr,
-        "time" => time_attr,
-        "expiration" => expiration_attr,
-        "user_id" => 1,
-        "foo" => "bar",
-        "baz" => <<1, 2, 3>>,
-        "qux" => true,
-        "quux" => "https://example.com",
-        "corge" => "https://example.com",
-        "grault" => %Google.Protobuf.Timestamp{seconds: 123_456_789}
+        "time" => {:ce_timestamp, time_attr},
+        "expiration" => {:ce_timestamp, expiration_attr},
+        "user_id" => {:ce_integer, user_id},
+        "foo" => {:ce_string, "bar"},
+        "baz" => {:ce_bytes, <<1, 2, 3>>},
+        "qux" => {:ce_boolean, true},
+        "quux" => {:ce_uri, "https://example.com"},
+        "corge" => {:ce_uri_ref, "https://example.com"},
+        "grault" => {:ce_timestamp, %Google.Protobuf.Timestamp{seconds: 123_456_789}}
       }
 
       encoded_cloudevent =

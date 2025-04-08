@@ -134,8 +134,8 @@ defmodule Trento.Contracts do
   end
 
   defp decode_attributes(attributes) do
-    Enum.into(attributes, %{}, fn {key, %CloudEvents.CloudEventAttributeValue{attr: {_, value}}} ->
-      {key, value}
+    Enum.into(attributes, %{}, fn {key, %CloudEvents.CloudEventAttributeValue{attr: attr}} ->
+      {key, attr}
     end)
   end
 
