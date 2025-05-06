@@ -3,3 +3,4 @@ erlang 26.2.1
 golang 1.22.5
 protoc 3.20.1
 protoc-gen-go 1.28.1
+rust stable
