@@ -7,7 +7,7 @@ from the link:https://github.com/trento-project/contracts/tree/main/protobuf[pro
 
 == Pre-requirements
 
-* Install https://asdf-vm.com/guide/getting-started.html[asdf] and add
+* Install link:https://asdf-vm.com/guide/getting-started.html[asdf] and add
 all the needed plugins:
 
 [source,bash]
