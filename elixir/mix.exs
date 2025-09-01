@@ -5,7 +5,7 @@ defmodule Proto.MixProject do
     [
       app: :trento_contracts,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps()
@@ -31,7 +31,7 @@ defmodule Proto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   def deps do
     [
-      {:protobuf, "~> 0.14.0"},
+      {:protobuf, "~> 0.15"},
       {:elixir_uuid, "~> 1.2"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
