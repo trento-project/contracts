@@ -9,6 +9,13 @@ jobs:
   elixir-deps:
     name: Elixir dependencies
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - elixir: "1.15"
+            otp: "26"
+          - elixir: "1.18"
+            otp: "27"
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -24,9 +31,8 @@ jobs:
         uses: erlef/setup-beam@v1
         id: setup-elixir
         with:
-          version-file: .tool-versions
-          version-type: strict
-
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
       - name: Retrieve Cached Dependencies
         uses: actions/cache@v4
         id: mix-cache
@@ -52,6 +58,13 @@ jobs:
     name: Static Code Analysis elixir
     needs: [elixir-deps]
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - elixir: "1.15"
+            otp: "26"
+          - elixir: "1.18"
+            otp: "27"
 
     steps:
       - name: Cancel Previous Runs
@@ -68,8 +81,8 @@ jobs:
         uses: erlef/setup-beam@v1
         id: setup-elixir
         with:
-          version-file: .tool-versions
-          version-type: strict
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
 
       - name: Retrieve Elixir Cached Dependencies
         uses: actions/cache@v4
@@ -101,6 +114,14 @@ jobs:
     name: Check elixir contracts
     needs: [elixir-deps]
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - elixir: "1.15"
+            otp: "26"
+          - elixir: "1.18"
+            otp: "27"
+
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -112,8 +133,8 @@ jobs:
         uses: erlef/setup-beam@v1
         id: setup-elixir
         with:
-          version-file: .tool-versions
-          version-type: strict
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@v4
@@ -207,6 +228,14 @@ jobs:
     name: Elixir test (Elixir ${{ matrix.elixir }}, OTP ${{ matrix.otp }})
     needs: [elixir-deps, check-elixir-contracts]
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - elixir: "1.15"
+            otp: "26"
+          - elixir: "1.18"
+            otp: "27"
+
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -222,8 +251,8 @@ jobs:
         uses: erlef/setup-beam@v1
         id: setup-elixir
         with:
-          version-file: .tool-versions
-          version-type: strict
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@v4
