@@ -127,8 +127,8 @@ jobs:
         uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
-      - uses: actions/checkout@v4
 
+      - uses: actions/checkout@v4
       - name: Setup
         uses: erlef/setup-beam@v1
         id: setup-elixir
@@ -146,9 +146,17 @@ jobs:
             elixir/priv/plts
           key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
 
+      - name: Read .tool-versions
+        uses: endorama/asdf-parse-tool-versions@v1.3.4
+        id: tool-versions
+
+      - name: Extract PROTOC sub-version
+        id: protoc_subversion
+        run: echo "subversion=${PROTOC_VERSION#*.}" >> "$GITHUB_OUTPUT"
+
       - uses: arduino/setup-protoc@v3
         with:
-          version: "20.1"
+          version: ${{ steps.protoc_subversion.outputs.subversion }}
 
       - name: Install protoc elixir plugin
         run: mix escript.install --force hex protobuf
@@ -181,9 +189,13 @@ jobs:
         uses: endorama/asdf-parse-tool-versions@v1.3.4
         id: tool-versions
 
+      - name: Extract PROTOC sub-version
+        id: protoc_subversion
+        run: echo "subversion=${PROTOC_VERSION#*.}" >> "$GITHUB_OUTPUT"
+
       - uses: arduino/setup-protoc@v3
         with:
-          version: ${{ env.PROTOC_VERSION }}
+          version: ${{ steps.protoc_subversion.outputs.subversion }}
 
       - name: Install protoc gen go
         run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v${{ env.PROTOC-GEN-GO_VERSION }}
