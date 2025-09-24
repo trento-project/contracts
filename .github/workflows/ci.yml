@@ -5,23 +5,17 @@ on:
     branches: [main]
   pull_request:
 
-env:
-  ELIXIR_VERSION: 1.14.3
-  OTP_VERSION: 25
-  ELIXIR_VERSION_OBS: 1.13.4
-  OTP_VERSION_OBS: 22
-
 jobs:
   elixir-deps:
-    name: Elixir dependencies (Elixir ${{ matrix.elixir }}, OTP ${{ matrix.otp }})
-    runs-on: ubuntu-20.04
+    name: Elixir dependencies
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         include:
-          - elixir: 1.14.3
-            otp: 25
-          - elixir: 1.13.4
-            otp: 22
+          - elixir: "1.15"
+            otp: "26"
+          - elixir: "1.18"
+            otp: "27"
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -35,21 +29,19 @@ jobs:
 
       - name: Setup
         uses: erlef/setup-beam@v1
+        id: setup-elixir
         with:
-          elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
-        env:
-          ImageOS: ubuntu20
-
+          elixir-version: ${{ matrix.elixir }}
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
             elixir/deps
             elixir/_build/test
             elixir/priv/plts
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('elixir/mix.lock') }}
+          key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
 
       - name: Install Dependencies
         if: steps.mix-cache.outputs.cache-hit != 'true'
@@ -65,7 +57,14 @@ jobs:
   static-code-analysis-elixir:
     name: Static Code Analysis elixir
     needs: [elixir-deps]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - elixir: "1.15"
+            otp: "26"
+          - elixir: "1.18"
+            otp: "27"
 
     steps:
       - name: Cancel Previous Runs
@@ -80,21 +79,20 @@ jobs:
 
       - name: Setup
         uses: erlef/setup-beam@v1
+        id: setup-elixir
         with:
-          elixir-version: ${{ env.ELIXIR_VERSION }}
-          otp-version: ${{ env.OTP_VERSION }}
-        env:
-          ImageOS: ubuntu20
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
 
       - name: Retrieve Elixir Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
             elixir/deps
             elixir/_build/test
             elixir/priv/plts
-          key: ${{ runner.os }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
+          key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
 
       - name: Run Credo
         working-directory: elixir
@@ -115,30 +113,38 @@ jobs:
   check-elixir-contracts:
     name: Check elixir contracts
     needs: [elixir-deps]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - elixir: "1.15"
+            otp: "26"
+          - elixir: "1.18"
+            otp: "27"
+
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
       - uses: actions/checkout@v4
+
       - name: Setup
         uses: erlef/setup-beam@v1
+        id: setup-elixir
         with:
-          elixir-version: ${{ env.ELIXIR_VERSION }}
-          otp-version: ${{ env.OTP_VERSION }}
-        env:
-          ImageOS: ubuntu20
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
             elixir/deps
             elixir/_build/test
             elixir/priv/plts
-          key: ${{ runner.os }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
+          key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
 
       - uses: arduino/setup-protoc@v3
         with:
@@ -160,7 +166,7 @@ jobs:
 
   check-go-contracts:
     name: Check go contracts
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -169,12 +175,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: 1.18
+          go-version: 1.22.5
+
+      - name: Read .tool-versions
+        uses: endorama/asdf-parse-tool-versions@v1.3.4
+        id: tool-versions
+
       - uses: arduino/setup-protoc@v3
         with:
-          version: "3.20.1"
+          version: ${{ env.PROTOC_VERSION }}
       - name: Install protoc gen go
-        run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+        run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v${{ env.PROTOC-GEN-GO_VERSION }}
       - name: generate contracts
         run: make go-generate
       - name: Check for uncommitted schema changes
@@ -188,7 +199,7 @@ jobs:
   test-golang:
     name: Go test
     needs: [check-go-contracts]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Cancel Previous Runs
@@ -201,9 +212,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Read .tool-versions
+        uses: endorama/asdf-parse-tool-versions@v1.3.4
+        id: tool-versions
+
       - uses: actions/setup-go@v5
         with:
-          go-version: 1.18
+          go-version: ${{ env.GOLANG_VERSION }}
 
       - name: Run golang tests
         working-directory: go
@@ -212,14 +227,14 @@ jobs:
   test-elixir:
     name: Elixir test (Elixir ${{ matrix.elixir }}, OTP ${{ matrix.otp }})
     needs: [elixir-deps, check-elixir-contracts]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         include:
-          - elixir: 1.14.3
-            otp: 25
-          - elixir: 1.13.4
-            otp: 22
+          - elixir: "1.15"
+            otp: "26"
+          - elixir: "1.18"
+            otp: "27"
 
     steps:
       - name: Cancel Previous Runs
@@ -234,19 +249,20 @@ jobs:
 
       - name: Setup
         uses: erlef/setup-beam@v1
+        id: setup-elixir
         with:
-          elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: mix-cache
         with:
           path: |
             elixir/deps
             elixir/_build/test
             elixir/priv/plts
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('elixir/mix.lock') }}
+          key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
       - name: Compile
         working-directory: elixir
         run: mix compile --warnings-as-errors

@@ -4,17 +4,11 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    reviewers:
-      - "trento-project/maintainers"
   - package-ecosystem: "mix"
     directory: "/elixir"
     schedule:
       interval: "daily"
-    reviewers:
-      - "trento-project/maintainers"
   - package-ecosystem: "gomod"
     directory: "/go"
     schedule:
       interval: "daily"
-    reviewers:
-      - "trento-project/maintainers"
