@@ -1,13 +1,13 @@
-== Trento Contracts
+= Trento Contracts
 
 == How to generate the interfaces
 
 Follow the next steps in order to generate the final code interfaces
 from the link:https://github.com/trento-project/contracts/tree/main/protobuf[protobuf definitions].
 
-=== Pre-requirements
+== Pre-requirements
 
-* Install https://asdf-vm.com/guide/getting-started.html[asdf] and add
+* Install link:https://asdf-vm.com/guide/getting-started.html[asdf] and add
 all the needed plugins:
 
 [source,bash]
@@ -43,7 +43,7 @@ mix escript.install hex protobuf
 asdf reshim
 ....
 
-=== Generate the code
+== Generate the code
 
 Once all the tools are installed, run the next command to update the
 final code interfaces:
