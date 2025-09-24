@@ -156,7 +156,7 @@ jobs:
 
       - uses: arduino/setup-protoc@v3
         with:
-          version: ${{ steps.protoc_subversion.outputs.subversion }}
+          version: "${{ steps.protoc_subversion.outputs.subversion }}"
 
       - name: Install protoc elixir plugin
         run: mix escript.install --force hex protobuf
@@ -195,7 +195,7 @@ jobs:
 
       - uses: arduino/setup-protoc@v3
         with:
-          version: ${{ steps.protoc_subversion.outputs.subversion }}
+          version: "${{ steps.protoc_subversion.outputs.subversion }}"
 
       - name: Install protoc gen go
         run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v${{ env.PROTOC-GEN-GO_VERSION }}
