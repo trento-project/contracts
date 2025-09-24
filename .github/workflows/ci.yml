@@ -150,13 +150,9 @@ jobs:
         uses: endorama/asdf-parse-tool-versions@v1.3.4
         id: tool-versions
 
-      - name: Extract PROTOC sub-version
-        id: protoc_subversion
-        run: echo "subversion=${PROTOC_VERSION#*.}" >> "$GITHUB_OUTPUT"
-
       - uses: arduino/setup-protoc@v3
         with:
-          version: "${{ steps.protoc_subversion.outputs.subversion }}"
+          version: ${{ env.PROTOC_VERSION }}
 
       - name: Install protoc elixir plugin
         run: mix escript.install --force hex protobuf
@@ -189,13 +185,9 @@ jobs:
         uses: endorama/asdf-parse-tool-versions@v1.3.4
         id: tool-versions
 
-      - name: Extract PROTOC sub-version
-        id: protoc_subversion
-        run: echo "subversion=${PROTOC_VERSION#*.}" >> "$GITHUB_OUTPUT"
-
       - uses: arduino/setup-protoc@v3
         with:
-          version: "${{ steps.protoc_subversion.outputs.subversion }}"
+          version: ${{ env.PROTOC_VERSION }}
 
       - name: Install protoc gen go
         run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v${{ env.PROTOC-GEN-GO_VERSION }}
