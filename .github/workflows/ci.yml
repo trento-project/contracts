@@ -147,7 +147,7 @@ jobs:
           key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
 
       - name: Read .tool-versions
-        uses: endorama/asdf-parse-tool-versions@v1.3.4
+        uses: endorama/asdf-parse-tool-versions@v1.4.0
         id: tool-versions
 
       - uses: arduino/setup-protoc@v3
@@ -182,7 +182,7 @@ jobs:
           go-version: 1.22.5
 
       - name: Read .tool-versions
-        uses: endorama/asdf-parse-tool-versions@v1.3.4
+        uses: endorama/asdf-parse-tool-versions@v1.4.0
         id: tool-versions
 
       - uses: arduino/setup-protoc@v3
@@ -218,7 +218,7 @@ jobs:
           fetch-depth: 0
 
       - name: Read .tool-versions
-        uses: endorama/asdf-parse-tool-versions@v1.3.4
+        uses: endorama/asdf-parse-tool-versions@v1.4.0
         id: tool-versions
 
       - uses: actions/setup-go@v5
