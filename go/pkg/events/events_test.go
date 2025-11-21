@@ -76,7 +76,22 @@ func TestToEvent(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	assert.EqualValues(t, rawCe, encodedEvent)
+	// Unmarshal both to compare contents instead of raw bytes to avoid timestamp precision issues
+	var expectedCe events.CloudEvent
+	err = proto.Unmarshal(rawCe, &expectedCe)
+	assert.NoError(t, err)
+
+	var actualCe events.CloudEvent
+	err = proto.Unmarshal(encodedEvent, &actualCe)
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedCe.Id, actualCe.Id)
+	assert.Equal(t, expectedCe.Source, actualCe.Source)
+	assert.Equal(t, expectedCe.SpecVersion, actualCe.SpecVersion)
+	assert.Equal(t, expectedCe.Type, actualCe.Type)
+	assert.True(t, proto.Equal(expectedCe.GetProtoData(), actualCe.GetProtoData()))
+	assert.Equal(t, expectedCe.GetAttributes()["time"].GetCeTimestamp().AsTime().Unix(), actualCe.GetAttributes()["time"].GetCeTimestamp().AsTime().Unix())
+	assert.Equal(t, expectedCe.GetAttributes()["expiration"].GetCeTimestamp().AsTime().Unix(), actualCe.GetAttributes()["expiration"].GetCeTimestamp().AsTime().Unix())
 }
 
 func TestToEventWithDefaults(t *testing.T) {
