@@ -190,7 +190,7 @@ jobs:
           version: ${{ env.PROTOC_VERSION }}
 
       - name: Install protoc gen go
-        run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v${{ env.PROTOC-GEN-GO_VERSION }}
+        run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v${{ env.PROTOC_GEN_GO_VERSION }}
       - name: generate contracts
         run: make go-generate
       - name: Check for uncommitted schema changes
