@@ -1,7 +1,10 @@
 defmodule Trento.Checks.V1.ExecutionStarted do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "Trento.Checks.V1.ExecutionStarted",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :execution_id, 1, type: :string, json_name: "executionId"
   field :group_id, 2, type: :string, json_name: "groupId"

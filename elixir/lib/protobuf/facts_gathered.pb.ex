@@ -1,7 +1,10 @@
 defmodule Trento.Checks.V1.FactError do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "Trento.Checks.V1.FactError",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :message, 1, type: :string
   field :type, 2, type: :string
@@ -10,7 +13,10 @@ end
 defmodule Trento.Checks.V1.Fact do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "Trento.Checks.V1.Fact",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   oneof :fact_value, 0
 
@@ -23,7 +29,10 @@ end
 defmodule Trento.Checks.V1.FactsGathered do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "Trento.Checks.V1.FactsGathered",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   field :execution_id, 1, type: :string, json_name: "executionId"
   field :group_id, 2, type: :string, json_name: "groupId"
