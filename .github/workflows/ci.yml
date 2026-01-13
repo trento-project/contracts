@@ -155,7 +155,9 @@ jobs:
           version: ${{ env.PROTOC_VERSION }}
 
       - name: Install protoc elixir plugin
-        run: mix escript.install --force hex protobuf
+        run: |
+          PROTOBUF_VERSION=$(cd ./elixir && mix run -e "Application.spec(:protobuf, :vsn) |> IO.puts" | tail -n 1)
+          mix escript.install --force hex protobuf $PROTOBUF_VERSION
       - name: Add escript bin folder to path
         run: echo "$HOME/.mix/escripts" >> $GITHUB_PATH
       - name: generate contracts
