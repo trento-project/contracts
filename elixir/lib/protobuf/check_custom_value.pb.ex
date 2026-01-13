@@ -1,7 +1,10 @@
 defmodule Trento.Checks.V1.CheckCustomValue do
   @moduledoc false
 
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+  use Protobuf,
+    full_name: "Trento.Checks.V1.CheckCustomValue",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
 
   oneof :value, 0
 
