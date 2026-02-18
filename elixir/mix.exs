@@ -33,6 +33,8 @@ defmodule Proto.MixProject do
     [
       {:protobuf, "~> 0.15"},
       {:elixir_uuid, "~> 1.2"},
+      {:grpc, "~> 0.11"},
+      {:grpc_reflection, "~> 0.2"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
