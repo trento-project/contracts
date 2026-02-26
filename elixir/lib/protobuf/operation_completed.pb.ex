@@ -15,6 +15,36 @@ defmodule Trento.Operations.V1.OperationResult do
   field :ALREADY_RUNNING, 5
 end
 
+defmodule Trento.Operations.V1.OperationErrorDetails.TargetErrorsEntry do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "Trento.Operations.V1.OperationErrorDetails.TargetErrorsEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :key, 1, type: :string
+  field :value, 2, type: :string
+end
+
+defmodule Trento.Operations.V1.OperationErrorDetails do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "Trento.Operations.V1.OperationErrorDetails",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :step, 1, type: :string
+
+  field :target_errors, 2,
+    repeated: true,
+    type: Trento.Operations.V1.OperationErrorDetails.TargetErrorsEntry,
+    json_name: "targetErrors",
+    map: true
+end
+
 defmodule Trento.Operations.V1.OperationCompleted do
   @moduledoc false
 
@@ -23,8 +53,15 @@ defmodule Trento.Operations.V1.OperationCompleted do
     protoc_gen_elixir_version: "0.16.0",
     syntax: :proto3
 
+  oneof :details, 0
+
   field :operation_id, 1, type: :string, json_name: "operationId"
   field :group_id, 2, type: :string, json_name: "groupId"
   field :operation_type, 3, type: :string, json_name: "operationType"
   field :result, 4, type: Trento.Operations.V1.OperationResult, enum: true
+
+  field :error_details, 5,
+    type: Trento.Operations.V1.OperationErrorDetails,
+    json_name: "errorDetails",
+    oneof: 0
 end

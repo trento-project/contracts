@@ -12,9 +12,18 @@ enum OperationResult {
     ALREADY_RUNNING = 5;
 }
 
+message OperationErrorDetails {
+  string step = 1;
+  map<string, string> target_errors = 2;
+}
+
 message OperationCompleted {
     string operation_id = 1;
     string group_id = 2;
     string operation_type = 3;
     OperationResult result = 4;
+    
+    oneof details {
+        OperationErrorDetails error_details = 5;
+    }
 }
