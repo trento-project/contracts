@@ -12,7 +12,22 @@ defmodule Trento.Operations.V1.OperationResult do
   field :ROLLED_BACK, 2
   field :FAILED, 3
   field :ABORTED, 4
-  field :ALREADY_RUNNING, 5
+  field :REQUEST_FAILED, 6
+end
+
+defmodule Trento.Operations.V1.OperationRequestFailedError do
+  @moduledoc false
+
+  use Protobuf,
+    enum: true,
+    full_name: "Trento.Operations.V1.OperationRequestFailedError",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :ARGUMENTS_MISSING, 0
+  field :TARGETS_MISSING, 1
+  field :ALREADY_RUNNING, 2
+  field :UNKNOWN, 3
 end
 
 defmodule Trento.Operations.V1.OperationErrorDetails.TargetErrorsEntry do
@@ -45,6 +60,17 @@ defmodule Trento.Operations.V1.OperationErrorDetails do
     map: true
 end
 
+defmodule Trento.Operations.V1.OperationRequestFailedDetails do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "Trento.Operations.V1.OperationRequestFailedDetails",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :error, 1, type: Trento.Operations.V1.OperationRequestFailedError, enum: true
+end
+
 defmodule Trento.Operations.V1.OperationCompleted do
   @moduledoc false
 
@@ -63,5 +89,10 @@ defmodule Trento.Operations.V1.OperationCompleted do
   field :error_details, 5,
     type: Trento.Operations.V1.OperationErrorDetails,
     json_name: "errorDetails",
+    oneof: 0
+
+  field :request_failed_details, 6,
+    type: Trento.Operations.V1.OperationRequestFailedDetails,
+    json_name: "requestFailedDetails",
     oneof: 0
 end

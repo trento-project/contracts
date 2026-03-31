@@ -4,17 +4,31 @@ package Trento.Operations.V1;
 option go_package = "/;events";
 
 enum OperationResult {
+    reserved 5;
+
     UPDATED = 0;
     NOT_UPDATED = 1;
     ROLLED_BACK = 2;
     FAILED = 3;
     ABORTED = 4;
-    ALREADY_RUNNING = 5;
+    // ALREADY_RUNNING = 5;
+    REQUEST_FAILED = 6;
+}
+
+enum OperationRequestFailedError {
+    ARGUMENTS_MISSING = 0;
+    TARGETS_MISSING = 1;
+    ALREADY_RUNNING = 2;
+    UNKNOWN = 3;
 }
 
 message OperationErrorDetails {
   string step = 1;
   map<string, string> target_errors = 2;
+}
+
+message OperationRequestFailedDetails {
+  OperationRequestFailedError error = 1;
 }
 
 message OperationCompleted {
@@ -25,5 +39,6 @@ message OperationCompleted {
     
     oneof details {
         OperationErrorDetails error_details = 5;
+        OperationRequestFailedDetails request_failed_details = 6;
     }
 }
