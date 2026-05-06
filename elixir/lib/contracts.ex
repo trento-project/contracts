@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: SUSE LLC
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Trento.Contracts do
   @moduledoc """
   This facade contains functions to eoncode/decode events to/from protobuf
