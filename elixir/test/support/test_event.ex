@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: SUSE LLC
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Test.Event do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.12.0", syntax: :proto3
