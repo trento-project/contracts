@@ -33,7 +33,6 @@ jobs:
 
       - name: Read .tool-versions
         uses: endorama/asdf-parse-tool-versions@23a7edd74b0f97626c857c48e32ebbe4ba596a23 # v1.5.1
-        id: tool-versions
 
       - name: Compute versions
         id: compute
