@@ -24,10 +24,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - elixir: "1.15"
-            otp: "26"
-          - elixir: "1.18"
-            otp: "27"
+          - elixir: "1.19.5"
+            otp: "28.5"
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
@@ -73,10 +71,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - elixir: "1.15"
-            otp: "26"
-          - elixir: "1.18"
-            otp: "27"
+          - elixir: "1.19.5"
+            otp: "28.5"
 
     steps:
       - name: Cancel Previous Runs
@@ -129,10 +125,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - elixir: "1.15"
-            otp: "26"
-          - elixir: "1.18"
-            otp: "27"
+          - elixir: "1.19.5"
+            otp: "28.5"
 
     steps:
       - name: Cancel Previous Runs
@@ -250,10 +244,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - elixir: "1.15"
-            otp: "26"
-          - elixir: "1.18"
-            otp: "27"
+          - elixir: "1.19.5"
+            otp: "28.5"
 
     steps:
       - name: Cancel Previous Runs
