@@ -38,11 +38,11 @@ jobs:
       - name: Compute versions
         id: compute
         run: |
-          echo "ELIXIR_VERSION=${{ env.ELIXIR_VERSION }}" >> $GITHUB_OUTPUT
-          echo "ERLANG_VERSION=${{ env.ERLANG_VERSION }}" >> $GITHUB_OUTPUT
-          echo "GOLANG_VERSION=${{ env.GOLANG_VERSION }}" >> $GITHUB_OUTPUT
-          echo "PROTOC_VERSION=${{ env.PROTOC_VERSION }}" >> $GITHUB_OUTPUT
-          echo "PROTOC_GEN_GO_VERSION=${{ env.PROTOC_GEN_GO_VERSION }}" >> $GITHUB_OUTPUT
+          echo "ELIXIR_VERSION=$ELIXIR_VERSION" >> "$GITHUB_OUTPUT"
+          echo "ERLANG_VERSION=$ERLANG_VERSION" >> "$GITHUB_OUTPUT"
+          echo "GOLANG_VERSION=$GOLANG_VERSION" >> "$GITHUB_OUTPUT"
+          echo "PROTOC_VERSION=$PROTOC_VERSION" >> "$GITHUB_OUTPUT"
+          echo "PROTOC_GEN_GO_VERSION=$PROTOC_GEN_GO_VERSION" >> "$GITHUB_OUTPUT"
 
   elixir-deps:
     name: Elixir dependencies
