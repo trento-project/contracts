@@ -18,14 +18,36 @@ jobs:
       - uses: apache/skywalking-eyes/header@61275cc80d0798a405cb070f7d3a8aaf7cf2c2c1 # v0.8.0
         name: Check license Headers
 
+  setup-env:
+    name: Setup Environment
+    runs-on: ubuntu-24.04
+    outputs:
+      ELIXIR_VERSION: ${{ steps.compute.outputs.ELIXIR_VERSION }}
+      ERLANG_VERSION: ${{ steps.compute.outputs.ERLANG_VERSION }}
+      GOLANG_VERSION: ${{ steps.compute.outputs.GOLANG_VERSION }}
+      PROTOC_VERSION: ${{ steps.compute.outputs.PROTOC_VERSION }}
+      PROTOC_GEN_GO_VERSION: ${{ steps.compute.outputs.PROTOC_GEN_GO_VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Read .tool-versions
+        uses: endorama/asdf-parse-tool-versions@23a7edd74b0f97626c857c48e32ebbe4ba596a23 # v1.5.1
+        id: tool-versions
+
+      - name: Compute versions
+        id: compute
+        run: |
+          echo "ELIXIR_VERSION=${{ env.ELIXIR_VERSION }}" >> $GITHUB_OUTPUT
+          echo "ERLANG_VERSION=${{ env.ERLANG_VERSION }}" >> $GITHUB_OUTPUT
+          echo "GOLANG_VERSION=${{ env.GOLANG_VERSION }}" >> $GITHUB_OUTPUT
+          echo "PROTOC_VERSION=${{ env.PROTOC_VERSION }}" >> $GITHUB_OUTPUT
+          echo "PROTOC_GEN_GO_VERSION=${{ env.PROTOC_GEN_GO_VERSION }}" >> $GITHUB_OUTPUT
+
   elixir-deps:
     name: Elixir dependencies
+    needs: [setup-env]
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        include:
-          - elixir: "1.19.5"
-            otp: "28.5"
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
@@ -41,8 +63,9 @@ jobs:
         uses: erlef/setup-beam@fc68ffb90438ef2936bbb3251622353b3dcb2f93 # v1
         id: setup-elixir
         with:
-          otp-version: ${{ matrix.otp }}
-          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ needs.setup-env.outputs.ERLANG_VERSION }}
+          elixir-version: ${{ needs.setup-env.outputs.ELIXIR_VERSION }}
+
       - name: Retrieve Cached Dependencies
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5
         id: mix-cache
@@ -51,7 +74,7 @@ jobs:
             elixir/deps
             elixir/_build/test
             elixir/priv/plts
-          key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
+          key: ${{ runner.os }}-${{ needs.setup-env.outputs.ERLANG_VERSION }}-${{ needs.setup-env.outputs.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
 
       - name: Install Dependencies
         if: steps.mix-cache.outputs.cache-hit != 'true'
@@ -66,13 +89,8 @@ jobs:
 
   static-code-analysis-elixir:
     name: Static Code Analysis elixir
-    needs: [elixir-deps]
+    needs: [setup-env, elixir-deps]
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        include:
-          - elixir: "1.19.5"
-            otp: "28.5"
 
     steps:
       - name: Cancel Previous Runs
@@ -89,8 +107,8 @@ jobs:
         uses: erlef/setup-beam@fc68ffb90438ef2936bbb3251622353b3dcb2f93 # v1
         id: setup-elixir
         with:
-          otp-version: ${{ matrix.otp }}
-          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ needs.setup-env.outputs.ERLANG_VERSION }}
+          elixir-version: ${{ needs.setup-env.outputs.ELIXIR_VERSION }}
 
       - name: Retrieve Elixir Cached Dependencies
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5
@@ -100,7 +118,7 @@ jobs:
             elixir/deps
             elixir/_build/test
             elixir/priv/plts
-          key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
+          key: ${{ runner.os }}-${{ needs.setup-env.outputs.ERLANG_VERSION }}-${{ needs.setup-env.outputs.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
 
       - name: Run Credo
         working-directory: elixir
@@ -120,13 +138,8 @@ jobs:
 
   check-elixir-contracts:
     name: Check elixir contracts
-    needs: [elixir-deps]
+    needs: [setup-env, elixir-deps]
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        include:
-          - elixir: "1.19.5"
-            otp: "28.5"
 
     steps:
       - name: Cancel Previous Runs
@@ -139,8 +152,8 @@ jobs:
         uses: erlef/setup-beam@fc68ffb90438ef2936bbb3251622353b3dcb2f93 # v1
         id: setup-elixir
         with:
-          otp-version: ${{ matrix.otp }}
-          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ needs.setup-env.outputs.ERLANG_VERSION }}
+          elixir-version: ${{ needs.setup-env.outputs.ELIXIR_VERSION }}
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5
@@ -150,15 +163,11 @@ jobs:
             elixir/deps
             elixir/_build/test
             elixir/priv/plts
-          key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
-
-      - name: Read .tool-versions
-        uses: endorama/asdf-parse-tool-versions@23a7edd74b0f97626c857c48e32ebbe4ba596a23 # v1.5.1
-        id: tool-versions
+          key: ${{ runner.os }}-${{ needs.setup-env.outputs.ERLANG_VERSION }}-${{ needs.setup-env.outputs.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
 
       - uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
         with:
-          version: ${{ env.PROTOC_VERSION }}
+          version: ${{ needs.setup-env.outputs.PROTOC_VERSION }}
 
       - name: Install protoc elixir plugin
         run: |
@@ -178,6 +187,7 @@ jobs:
 
   check-go-contracts:
     name: Check go contracts
+    needs: [setup-env]
     runs-on: ubuntu-24.04
     steps:
       - name: Cancel Previous Runs
@@ -187,18 +197,14 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
-          go-version: 1.22.5
-
-      - name: Read .tool-versions
-        uses: endorama/asdf-parse-tool-versions@23a7edd74b0f97626c857c48e32ebbe4ba596a23 # v1.5.1
-        id: tool-versions
+          go-version: ${{ needs.setup-env.outputs.GOLANG_VERSION }}
 
       - uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
         with:
-          version: ${{ env.PROTOC_VERSION }}
+          version: ${{ needs.setup-env.outputs.PROTOC_VERSION }}
 
       - name: Install protoc gen go
-        run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v${{ env.PROTOC_GEN_GO_VERSION }}
+        run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v${{ needs.setup-env.outputs.PROTOC_GEN_GO_VERSION }}
       - name: generate contracts
         run: make go-generate
       - name: Check for uncommitted schema changes
@@ -211,7 +217,7 @@ jobs:
 
   test-golang:
     name: Go test
-    needs: [check-go-contracts]
+    needs: [setup-env, check-go-contracts]
     runs-on: ubuntu-24.04
 
     steps:
@@ -225,27 +231,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Read .tool-versions
-        uses: endorama/asdf-parse-tool-versions@23a7edd74b0f97626c857c48e32ebbe4ba596a23 # v1.5.1
-        id: tool-versions
-
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
-          go-version: ${{ env.GOLANG_VERSION }}
+          go-version: ${{ needs.setup-env.outputs.GOLANG_VERSION }}
 
       - name: Run golang tests
         working-directory: go
         run: go mod download && go test ./...
 
   test-elixir:
-    name: Elixir test (Elixir ${{ matrix.elixir }}, OTP ${{ matrix.otp }})
-    needs: [elixir-deps, check-elixir-contracts]
+    name: Elixir test
+    needs: [setup-env, static-code-analysis-elixir, check-elixir-contracts]
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        include:
-          - elixir: "1.19.5"
-            otp: "28.5"
 
     steps:
       - name: Cancel Previous Runs
@@ -262,8 +259,8 @@ jobs:
         uses: erlef/setup-beam@fc68ffb90438ef2936bbb3251622353b3dcb2f93 # v1
         id: setup-elixir
         with:
-          otp-version: ${{ matrix.otp }}
-          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ needs.setup-env.outputs.ERLANG_VERSION }}
+          elixir-version: ${{ needs.setup-env.outputs.ELIXIR_VERSION }}
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5
@@ -273,7 +270,7 @@ jobs:
             elixir/deps
             elixir/_build/test
             elixir/priv/plts
-          key: ${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('elixir/mix.lock') }}
+          key: ${{ runner.os }}-${{ needs.setup-env.outputs.ERLANG_VERSION }}-${{ needs.setup-env.outputs.ELIXIR_VERSION }}-${{ hashFiles('elixir/mix.lock') }}
       - name: Compile
         working-directory: elixir
         run: mix compile --warnings-as-errors
