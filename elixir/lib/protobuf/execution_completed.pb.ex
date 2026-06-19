@@ -4,7 +4,7 @@ defmodule Trento.Checks.V1.Result do
   use Protobuf,
     enum: true,
     full_name: "Trento.Checks.V1.Result",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :PASSING, 0
@@ -17,7 +17,7 @@ defmodule Trento.Checks.V1.ExecutionCompleted do
 
   use Protobuf,
     full_name: "Trento.Checks.V1.ExecutionCompleted",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :execution_id, 1, type: :string, json_name: "executionId"

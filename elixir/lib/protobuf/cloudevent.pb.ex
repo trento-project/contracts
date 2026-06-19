@@ -4,7 +4,7 @@ defmodule CloudEvents.CloudEvent.AttributesEntry do
   use Protobuf,
     full_name: "CloudEvents.CloudEvent.AttributesEntry",
     map: true,
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :key, 1, type: :string
@@ -16,7 +16,7 @@ defmodule CloudEvents.CloudEvent do
 
   use Protobuf,
     full_name: "CloudEvents.CloudEvent",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   oneof :data, 0
@@ -36,7 +36,7 @@ defmodule CloudEvents.CloudEventAttributeValue do
 
   use Protobuf,
     full_name: "CloudEvents.CloudEventAttributeValue",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   oneof :attr, 0

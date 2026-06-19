@@ -3,7 +3,7 @@ defmodule Trento.Checks.V1.FactRequest do
 
   use Protobuf,
     full_name: "Trento.Checks.V1.FactRequest",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :check_id, 1, type: :string, json_name: "checkId"
@@ -17,7 +17,7 @@ defmodule Trento.Checks.V1.FactsGatheringRequestedTarget do
 
   use Protobuf,
     full_name: "Trento.Checks.V1.FactsGatheringRequestedTarget",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :agent_id, 1, type: :string, json_name: "agentId"
@@ -33,7 +33,7 @@ defmodule Trento.Checks.V1.FactsGatheringRequested do
 
   use Protobuf,
     full_name: "Trento.Checks.V1.FactsGatheringRequested",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :execution_id, 1, type: :string, json_name: "executionId"

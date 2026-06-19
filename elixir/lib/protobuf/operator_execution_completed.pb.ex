@@ -4,7 +4,7 @@ defmodule Trento.Operations.V1.OperatorPhase do
   use Protobuf,
     enum: true,
     full_name: "Trento.Operations.V1.OperatorPhase",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :PLAN, 0
@@ -18,7 +18,7 @@ defmodule Trento.Operations.V1.OperatorDiff do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperatorDiff",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :before, 1, type: Google.Protobuf.Value
@@ -30,7 +30,7 @@ defmodule Trento.Operations.V1.OperatorResponse do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperatorResponse",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :phase, 1, type: Trento.Operations.V1.OperatorPhase, enum: true
@@ -42,7 +42,7 @@ defmodule Trento.Operations.V1.OperatorError do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperatorError",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :phase, 1, type: Trento.Operations.V1.OperatorPhase, enum: true
@@ -54,7 +54,7 @@ defmodule Trento.Operations.V1.OperatorExecutionCompleted do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperatorExecutionCompleted",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   oneof :result, 0
