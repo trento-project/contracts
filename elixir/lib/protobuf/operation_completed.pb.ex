@@ -4,7 +4,7 @@ defmodule Trento.Operations.V1.OperationResult do
   use Protobuf,
     enum: true,
     full_name: "Trento.Operations.V1.OperationResult",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :UPDATED, 0
@@ -21,7 +21,7 @@ defmodule Trento.Operations.V1.OperationRequestFailedError do
   use Protobuf,
     enum: true,
     full_name: "Trento.Operations.V1.OperationRequestFailedError",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :ARGUMENTS_MISSING, 0
@@ -36,7 +36,7 @@ defmodule Trento.Operations.V1.OperationErrorDetails.TargetErrorsEntry do
   use Protobuf,
     full_name: "Trento.Operations.V1.OperationErrorDetails.TargetErrorsEntry",
     map: true,
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :key, 1, type: :string
@@ -48,7 +48,7 @@ defmodule Trento.Operations.V1.OperationErrorDetails do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperationErrorDetails",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :step, 1, type: :string
@@ -65,7 +65,7 @@ defmodule Trento.Operations.V1.OperationRequestFailedDetails do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperationRequestFailedDetails",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :error, 1, type: Trento.Operations.V1.OperationRequestFailedError, enum: true
@@ -76,7 +76,7 @@ defmodule Trento.Operations.V1.OperationCompleted do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperationCompleted",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   oneof :details, 0

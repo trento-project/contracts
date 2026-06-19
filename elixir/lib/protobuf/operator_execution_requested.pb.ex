@@ -4,7 +4,7 @@ defmodule Trento.Operations.V1.OperatorExecutionRequestedTarget.ArgumentsEntry d
   use Protobuf,
     full_name: "Trento.Operations.V1.OperatorExecutionRequestedTarget.ArgumentsEntry",
     map: true,
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :key, 1, type: :string
@@ -16,7 +16,7 @@ defmodule Trento.Operations.V1.OperatorExecutionRequestedTarget do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperatorExecutionRequestedTarget",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :agent_id, 1, type: :string, json_name: "agentId"
@@ -32,7 +32,7 @@ defmodule Trento.Operations.V1.OperatorExecutionRequested do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperatorExecutionRequested",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :operation_id, 1, type: :string, json_name: "operationId"

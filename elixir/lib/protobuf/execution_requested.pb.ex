@@ -4,7 +4,7 @@ defmodule Trento.Checks.V1.ExecutionRequested.EnvEntry do
   use Protobuf,
     full_name: "Trento.Checks.V1.ExecutionRequested.EnvEntry",
     map: true,
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :key, 1, type: :string
@@ -16,7 +16,7 @@ defmodule Trento.Checks.V1.ExecutionRequested do
 
   use Protobuf,
     full_name: "Trento.Checks.V1.ExecutionRequested",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :execution_id, 1, type: :string, json_name: "executionId"

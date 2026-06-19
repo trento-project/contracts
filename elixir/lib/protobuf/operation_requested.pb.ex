@@ -3,7 +3,7 @@ defmodule Trento.Operations.V1.OperationRequested do
 
   use Protobuf,
     full_name: "Trento.Operations.V1.OperationRequested",
-    protoc_gen_elixir_version: "0.16.0",
+    protoc_gen_elixir_version: "0.16.1",
     syntax: :proto3
 
   field :operation_id, 1, type: :string, json_name: "operationId"
