@@ -268,6 +268,55 @@ defmodule Trento.ContractsTest do
     end
   end
 
+  describe "Target attributes" do
+    test "round-trip serialisation with attributes populated" do
+      target = %Trento.Checks.V1.Target{
+        agent_id: "agent-1",
+        checks: ["check-1", "check-2"],
+        attributes: %{
+          "provider" => %Google.Protobuf.Value{kind: {:string_value, "aws"}},
+          "os_family" => %Google.Protobuf.Value{kind: {:string_value, "sles"}},
+          "arch" => %Google.Protobuf.Value{kind: {:string_value, "x86_64"}},
+          "cluster_role" => %Google.Protobuf.Value{kind: {:string_value, "primary"}},
+          "roles" => %Google.Protobuf.Value{
+            kind:
+              {:list_value,
+               %Google.Protobuf.ListValue{
+                 values: [%Google.Protobuf.Value{kind: {:string_value, "hana_primary"}}]
+               }}
+          }
+        }
+      }
+
+      encoded = Trento.Checks.V1.Target.encode(target)
+      decoded = Trento.Checks.V1.Target.decode(encoded)
+
+      assert decoded.agent_id == target.agent_id
+      assert decoded.checks == target.checks
+      assert decoded.attributes["provider"].kind == {:string_value, "aws"}
+      assert decoded.attributes["os_family"].kind == {:string_value, "sles"}
+      assert decoded.attributes["arch"].kind == {:string_value, "x86_64"}
+      assert decoded.attributes["cluster_role"].kind == {:string_value, "primary"}
+
+      [role] = decoded.attributes["roles"].kind |> elem(1) |> Map.get(:values)
+      assert role.kind == {:string_value, "hana_primary"}
+    end
+
+    test "backwards compatibility: absent attributes decodes to empty map" do
+      old_target = %Trento.Checks.V1.Target{
+        agent_id: "agent-old",
+        checks: ["check-1"]
+      }
+
+      encoded = Trento.Checks.V1.Target.encode(old_target)
+      decoded = Trento.Checks.V1.Target.decode(encoded)
+
+      assert decoded.agent_id == old_target.agent_id
+      assert decoded.checks == old_target.checks
+      assert decoded.attributes == %{}
+    end
+  end
+
   defp build_cloud_event(id, event, attributes) do
     %CloudEvent{
       data:

@@ -6,7 +6,10 @@ syntax = "proto3";
 package Trento.Checks.V1;
 option go_package = "/;events";
 
+import "google/protobuf/struct.proto";
+
 message Target {
     string agent_id = 1;
     repeated string checks = 2;
+    map<string, google.protobuf.Value> attributes = 3;
 }
