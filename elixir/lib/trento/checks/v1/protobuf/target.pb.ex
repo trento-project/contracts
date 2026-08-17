@@ -4,7 +4,7 @@ defmodule Trento.Checks.V1.Target.AttributesEntry do
   use Protobuf,
     full_name: "Trento.Checks.V1.Target.AttributesEntry",
     map: true,
-    protoc_gen_elixir_version: "0.16.1",
+    protoc_gen_elixir_version: "0.17.0",
     syntax: :proto3
 
   field :key, 1, type: :string
