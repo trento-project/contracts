@@ -3,12 +3,12 @@
 
 module github.com/trento-project/contracts/go
 
-go 1.25
+go 1.26
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/stretchr/testify v1.11.1
-	google.golang.org/protobuf v1.36.11
+	github.com/stretchr/testify v1.12.0
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
