@@ -12,6 +12,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 )
 
 func TestToEvent(t *testing.T) {
@@ -345,4 +346,52 @@ func TestFromEventExpirationMalformedError(t *testing.T) {
 	assert.NoError(t, err)
 	err = events.FromEvent(rawEvent, &decodedEvent, events.WithExpirationCheck())
 	assert.ErrorIs(t, err, events.ErrExpirationAttributeMalformed)
+}
+
+func TestTargetAttributesRoundTrip(t *testing.T) {
+	target := &events.Target{
+		AgentId: "agent-1",
+		Checks:  []string{"check-1", "check-2"},
+		Attributes: map[string]*structpb.Value{
+			"provider":     structpb.NewStringValue("aws"),
+			"os_family":    structpb.NewStringValue("sles"),
+			"arch":         structpb.NewStringValue("x86_64"),
+			"cluster_role": structpb.NewStringValue("primary"),
+			"roles":        structpb.NewListValue(&structpb.ListValue{Values: []*structpb.Value{structpb.NewStringValue("hana_primary")}}),
+		},
+	}
+
+	data, err := proto.Marshal(target)
+	assert.NoError(t, err)
+
+	var decoded events.Target
+	err = proto.Unmarshal(data, &decoded)
+	assert.NoError(t, err)
+
+	assert.Equal(t, target.AgentId, decoded.AgentId)
+	assert.Equal(t, target.Checks, decoded.Checks)
+	assert.Equal(t, target.Attributes["provider"].GetStringValue(), decoded.Attributes["provider"].GetStringValue())
+	assert.Equal(t, target.Attributes["os_family"].GetStringValue(), decoded.Attributes["os_family"].GetStringValue())
+	assert.Equal(t, target.Attributes["arch"].GetStringValue(), decoded.Attributes["arch"].GetStringValue())
+	assert.Equal(t, target.Attributes["cluster_role"].GetStringValue(), decoded.Attributes["cluster_role"].GetStringValue())
+	assert.Equal(t, target.Attributes["roles"].GetListValue().Values[0].GetStringValue(), decoded.Attributes["roles"].GetListValue().Values[0].GetStringValue())
+}
+
+func TestTargetAttributesBackwardsCompatibility(t *testing.T) {
+	// A target produced by an old sender that does not set attributes.
+	old := &events.Target{
+		AgentId: "agent-old",
+		Checks:  []string{"check-1"},
+	}
+
+	data, err := proto.Marshal(old)
+	assert.NoError(t, err)
+
+	var decoded events.Target
+	err = proto.Unmarshal(data, &decoded)
+	assert.NoError(t, err)
+
+	assert.Equal(t, old.AgentId, decoded.AgentId)
+	assert.Equal(t, old.Checks, decoded.Checks)
+	assert.Empty(t, decoded.Attributes)
 }
