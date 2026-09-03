@@ -3,12 +3,12 @@
 
 module github.com/trento-project/contracts/go
 
-go 1.25
+go 1.26
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/stretchr/testify v1.12.0
+	github.com/stretchr/testify v1.12.1
 	google.golang.org/protobuf v1.36.12
 )
 
-require gopkg.in/yaml.v3 v3.0.1 // indirect
+require go.yaml.in/yaml/v3 v3.0.5 // indirect
