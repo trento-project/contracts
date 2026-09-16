@@ -276,3 +276,21 @@ jobs:
       - name: Run elixir test
         working-directory: elixir
         run: mix test --warnings-as-errors --color --trace --slowest 10
+
+  dependabot-auto-merge:
+    name: Approve and merge Dependabot PRs
+    if: >
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.user.login == 'dependabot[bot]'
+    needs:
+      - linter-license-headers
+      - test-golang
+      - test-elixir
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    uses: trento-project/.github/.github/workflows/dependabot-auto-merge.yaml@main # v1.9.0
