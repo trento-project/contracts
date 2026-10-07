@@ -34,7 +34,7 @@ defmodule Proto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   def deps do
     [
-      {:protobuf, "~> 0.16"},
+      {:protobuf, "~> 0.17"},
       {:elixir_uuid, "~> 1.2"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
